@@ -1,21 +1,32 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { getDatabase } from "firebase/database";
+import { getStorage } from "firebase/storage";
+import { getFirestore } from "firebase/firestore";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCTbQfESOHFamYtpngQh6QQA8nEAwd4ne4",
-  authDomain: "portfolio-b321d.firebaseapp.com",
-  projectId: "portfolio-b321d",
-  storageBucket: "portfolio-b321d.appspot.com",
-  messagingSenderId: "644780794630",
-  appId: "1:644780794630:web:1e64f6604ebcf27541f487",
-  measurementId: "G-PERFV1SGXS",
+  apiKey: "AIzaSyAbi9n479c1MVqiX2-rcAtRWRC-5NeNncw",
+  authDomain: "chatresumeapi.firebaseapp.com",
+  databaseURL: "https://chatresumeapi-default-rtdb.firebaseio.com",
+  projectId: "chatresumeapi",
+  storageBucket: "chatresumeapi.appspot.com",
+  messagingSenderId: "579311045952",
+  appId: "1:579311045952:web:153e8ab23f08b50bc47ea5",
+  measurementId: "G-J8CQST5T6C",
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+
+const database = getDatabase(
+  app,
+  "https://chatresumeapi-default-rtdb.firebaseio.com/"
+);
+const storage = getStorage(app, "gs://chatresumeapi.appspot.com");
+const db = getFirestore(app);
+
+export { database, storage, db };

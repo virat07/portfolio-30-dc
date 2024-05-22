@@ -1,0 +1,10 @@
+circle,
+rect,
+line {
+  stroke-width: 10px;
+  stroke-linecap: round;
+  fill: transparent;
+}
+.heroCustomClass {
+  @apply px-3 py-2 rounded-md text-base font-medium text-center hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500;
+}
