@@ -22,7 +22,7 @@ const AccordionComponent = ({ experiences }) => {
   const [openIndex, setOpenIndex] = useState(0);
 
   const toggleAccordion = (index) => {
-    setOpenIndex(openIndex === index ? null : index);
+    setOpenIndex(index);
   };
 
   return (
