@@ -58,7 +58,9 @@ const ChatButtonComponent = () => {
   }, []);
 
   const sendMessage = async (content, role) => {
-    const newMessage = { role, content };
+    // Limit message to maximum 50 words
+    const limitedContent = content.split(" ").slice(0, 50).join(" ");
+    const newMessage = { role, content: limitedContent };
     setChatMessages((prevMessages) => [...prevMessages, newMessage]);
     setIsSending(true);
     setError(""); // Reset error
@@ -73,7 +75,7 @@ const ChatButtonComponent = () => {
         },
         body: JSON.stringify({
           model: "gpt-3.5-turbo-0125",
-          messages: [{ role: "user", content }],
+          messages: [{ role: "user", content: limitedContent }],
         }),
       });
 
