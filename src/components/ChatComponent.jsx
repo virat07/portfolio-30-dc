@@ -3,8 +3,9 @@ import OpenAI from "openai";
 import { FaPaperPlane, FaUser, FaRobot, FaTimes } from "react-icons/fa";
 import chatNotificationSound from "../assets/chat_notification.mp3";
 
+// Initialize OpenAI instance with environment variable API key
 const openai = new OpenAI({
-  apiKey: "sk-proj-JNSipkpV9zo3tGNhVCG0T3BlbkFJSFPnJnl1DXxhV299SdWr",
+  apiKey: process.env.REACT_APP_OPEN_AI_KEY,
   dangerouslyAllowBrowser: true,
 });
 
