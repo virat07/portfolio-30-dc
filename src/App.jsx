@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { BrowserRouter as Router, Link, Routes, Route } from "react-router-dom";
 import { storage } from "../firebaseConfig";
 import { ref, getDownloadURL } from "firebase/storage";
@@ -27,6 +27,8 @@ export default function App() {
 
     fetchProfilePic();
   }, []);
+
+  // Function to scroll to a specific element on the page
 
   return (
     <Router>

@@ -49,7 +49,6 @@ const MediumNotionComponent = () => {
             key={post.guid}
             className="bg-white shadow-md rounded-lg overflow-hidden transition-transform transform hover:scale-105"
           >
-            {console.log(post)}
             {post.thumbnail && (
               <img
                 src={post.thumbnail}
