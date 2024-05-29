@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { BrowserRouter as Router, Link, Routes, Route } from "react-router-dom";
 import { storage } from "../firebaseConfig";
 import { ref, getDownloadURL } from "firebase/storage";
 import NavBarComponent from "./components/NavBar";
@@ -9,10 +8,16 @@ import AboutUs from "./components/AboutUsComponent";
 import WorkExperience from "./components/ExperienceComponent";
 import SkillsComponent from "./components/SkillsComponent";
 import MediumNotionComponent from "./components/MediumNotionComponent";
-import ChatButton from "./components/ChatComponent"; // Import the ChatButton component
+import ChatButton from "./components/ChatComponent";
 
 export default function App() {
   const [profilePicUrl, setProfilePicUrl] = useState("");
+
+  const typingHomeRef = useRef(null);
+  const aboutUsRef = useRef(null);
+  const experienceRef = useRef(null);
+  const skillsRef = useRef(null);
+  const mediumNotionRef = useRef(null);
 
   useEffect(() => {
     const fetchProfilePic = async () => {
@@ -28,25 +33,46 @@ export default function App() {
     fetchProfilePic();
   }, []);
 
-  // Function to scroll to a specific element on the page
+  const scrollToSection = (ref) => {
+    window.scrollTo({
+      top: ref.current.offsetTop,
+      behavior: "smooth",
+    });
+  };
 
   return (
-    <Router>
-      <NavBarComponent />
-
+    <div>
+      <NavBarComponent
+        scrollToSection={scrollToSection}
+        refs={{
+          typingHomeRef,
+          aboutUsRef,
+          experienceRef,
+          skillsRef,
+          mediumNotionRef,
+        }}
+      />
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <TypingHomeComponent profilePicUrl={profilePicUrl} />
-        <AboutUs profilePicUrl={profilePicUrl} />
-        <WorkExperience />
-        <SkillsComponent />
-        <MediumNotionComponent />
+        <div ref={typingHomeRef}>
+          <TypingHomeComponent profilePicUrl={profilePicUrl} />
+        </div>
+        <div ref={aboutUsRef}>
+          <AboutUs profilePicUrl={profilePicUrl} />
+        </div>
+        <div ref={experienceRef}>
+          <WorkExperience />
+        </div>
+        <div ref={skillsRef}>
+          <SkillsComponent />
+        </div>
+        <div ref={mediumNotionRef}>
+          <MediumNotionComponent />
+        </div>
       </div>
-
       <FooterComponent />
-
       {/* Chat Button positioned in the bottom right */}
       <ChatButton />
-    </Router>
+    </div>
   );
 }

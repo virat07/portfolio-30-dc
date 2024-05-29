@@ -2,7 +2,7 @@ import React from "react";
 import Blogo from "../assets/BIcon.png";
 import DownloadResumeComponent from "./DownloadResume";
 
-const NavBarComponent = () => {
+const NavBarComponent = ({ scrollToSection, refs }) => {
   return (
     <nav className="bg-gray-800 p-4 flex items-center justify-between">
       <div className="flex items-center">
@@ -10,24 +10,36 @@ const NavBarComponent = () => {
       </div>
       <ul className="flex space-x-4">
         <li className="px-4">
-          <a href="/" className="text-white hover:text-gray-400">
+          <button
+            onClick={() => scrollToSection(refs.typingHomeRef)}
+            className="text-white hover:text-gray-400"
+          >
             Home
-          </a>
+          </button>
         </li>
         <li className="px-4">
-          <a href="/about" className="text-white hover:text-gray-400">
+          <button
+            onClick={() => scrollToSection(refs.aboutUsRef)}
+            className="text-white hover:text-gray-400"
+          >
             About
-          </a>
+          </button>
         </li>
         <li className="px-4">
-          <a href="/experience" className="text-white hover:text-gray-400">
+          <button
+            onClick={() => scrollToSection(refs.experienceRef)}
+            className="text-white hover:text-gray-400"
+          >
             Experience
-          </a>
+          </button>
         </li>
         <li className="px-4">
-          <a href="/skills" className="text-white hover:text-gray-400">
+          <button
+            onClick={() => scrollToSection(refs.skillsRef)}
+            className="text-white hover:text-gray-400"
+          >
             Skills
-          </a>
+          </button>
         </li>
       </ul>
       <DownloadResumeComponent />
