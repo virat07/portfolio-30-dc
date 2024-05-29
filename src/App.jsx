@@ -55,7 +55,11 @@ export default function App() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div ref={typingHomeRef}>
-          <TypingHomeComponent profilePicUrl={profilePicUrl} />
+          <TypingHomeComponent
+            profilePicUrl={profilePicUrl}
+            scrollToSection={scrollToSection}
+            refs={{ aboutUsRef, experienceRef, skillsRef, mediumNotionRef }}
+          />
         </div>
         <div ref={aboutUsRef}>
           <AboutUs profilePicUrl={profilePicUrl} />
