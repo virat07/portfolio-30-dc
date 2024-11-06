@@ -28,7 +28,7 @@ const FooterComponent = () => {
             <h2 className="text-xl font-semibold">Follow Me</h2>
             <div className="flex justify-center mt-4 space-x-6">
               <a
-                href="https://www.linkedin.com/in/bharat-gupta-07/"
+                href="https://www.linkedin.com/in/bharat-gupta07/"
                 className="hover:text-gray-400"
                 aria-label="LinkedIn"
                 target="_blank"
