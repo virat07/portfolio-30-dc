@@ -37,10 +37,10 @@ const ChatButtonComponent = () => {
 
   useEffect(() => {
     if (unreadMessages > 0) {
-      document.title = `(${unreadMessages}) New Message - Chat`;
+      document.title = `(${unreadMessages}) New Message - Bharat Gupta`;
       notificationSound.play();
     } else {
-      document.title = "Chat";
+      document.title = "Bharat Gupta";
     }
   }, [unreadMessages, notificationSound]);
 
