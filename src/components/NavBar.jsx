@@ -1,48 +1,135 @@
-import React from "react";
+import React, { useState } from "react";
 import Blogo from "../assets/BIcon.png";
 import DownloadResumeComponent from "./DownloadResume";
+import { HiMenu, HiX } from "react-icons/hi";
+import { FaSun, FaMoon } from "react-icons/fa";
 
-const NavBarComponent = ({ scrollToSection, refs }) => {
+const NavBarComponent = ({ scrollToSection, refs, theme, toggleTheme }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const navItems = [
+    { label: "Home", ref: refs.typingHomeRef },
+    { label: "About", ref: refs.aboutUsRef },
+    { label: "Experience", ref: refs.experienceRef },
+    { label: "Skills", ref: refs.skillsRef },
+    { label: "Blog", ref: refs.mediumNotionRef },
+  ];
+
+  const handleScroll = (ref) => {
+    if (ref && ref.current) {
+      const navbarHeight = 64; // adjust if navbar height changes
+      const elementPosition =
+        ref.current.getBoundingClientRect().top + window.pageYOffset;
+      const offsetPosition = elementPosition - navbarHeight;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+      setIsOpen(false);
+    }
+  };
+
   return (
-    <nav className="bg-gray-800 p-4 flex items-center justify-between">
-      <div className="flex items-center">
-        <img src={Blogo} alt="logo" className="h-10" />
+    <nav
+      className={`fixed w-full shadow-lg z-50 transition-colors duration-300 ${
+        theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-gray-900"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            <img src={Blogo} alt="logo" className="h-10 w-10" />
+          </div>
+
+          {/* Desktop Menu */}
+          <div className="hidden md:flex space-x-6 items-center">
+            {navItems.map((item, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleScroll(item.ref)}
+                className={`transition-colors duration-300 font-medium ${
+                  theme === "dark"
+                    ? "hover:text-teal-300"
+                    : "hover:text-teal-500"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+            <DownloadResumeComponent />
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="ml-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+            >
+              {theme === "dark" ? (
+                <FaSun className="text-yellow-400" />
+              ) : (
+                <FaMoon className="text-gray-800" />
+              )}
+            </button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="focus:outline-none text-current"
+            >
+              {isOpen ? (
+                <HiX className="h-6 w-6" />
+              ) : (
+                <HiMenu className="h-6 w-6" />
+              )}
+            </button>
+          </div>
+        </div>
       </div>
-      <ul className="flex space-x-4">
-        <li className="px-4">
-          <button
-            onClick={() => scrollToSection(refs.typingHomeRef)}
-            className="text-white hover:text-gray-400"
+
+      {/* Mobile Menu */}
+      {isOpen && (
+        <div
+          className={`md:hidden px-4 pt-2 pb-4 space-y-2 transition-colors duration-300 ${
+            theme === "dark"
+              ? "bg-gray-900 text-white"
+              : "bg-white text-gray-900"
+          }`}
+        >
+          {navItems.map((item, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleScroll(item.ref)}
+              className={`block w-full text-left px-2 py-2 rounded-md transition duration-200 ${
+                theme === "dark" ? "hover:bg-gray-700" : "hover:bg-gray-200"
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+          <div
+            className={`block w-full text-left px-2 py-2 rounded-md transition duration-200 ${
+              theme === "dark" ? "hover:bg-gray-700" : "hover:bg-gray-200"
+            }`}
           >
-            Home
-          </button>
-        </li>
-        <li className="px-4">
+            <DownloadResumeComponent />
+          </div>
+          {/* Theme Toggle */}
           <button
-            onClick={() => scrollToSection(refs.aboutUsRef)}
-            className="text-white hover:text-gray-400"
+            onClick={toggleTheme}
+            className={`mt-2 p-2 rounded-full w-full flex justify-center transition ${
+              theme === "dark" ? "hover:bg-gray-700" : "hover:bg-gray-200"
+            }`}
           >
-            About
+            {theme === "dark" ? (
+              <FaSun className="text-yellow-400" />
+            ) : (
+              <FaMoon className="text-gray-800" />
+            )}
           </button>
-        </li>
-        <li className="px-4">
-          <button
-            onClick={() => scrollToSection(refs.experienceRef)}
-            className="text-white hover:text-gray-400"
-          >
-            Experience
-          </button>
-        </li>
-        <li className="px-4">
-          <button
-            onClick={() => scrollToSection(refs.skillsRef)}
-            className="text-white hover:text-gray-400"
-          >
-            Skills
-          </button>
-        </li>
-      </ul>
-      <DownloadResumeComponent />
+        </div>
+      )}
     </nav>
   );
 };

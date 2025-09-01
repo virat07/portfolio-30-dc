@@ -23,7 +23,7 @@ const DownloadResumeComponent = () => {
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center justify-between w-full text-white font-semibold"
+          className="flex items-center justify-between w-full font-semibold"
         >
           Resume
           <motion.div

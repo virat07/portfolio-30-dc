@@ -1,199 +1,163 @@
-import React, { useState, useEffect } from "react";
-import OpenAI from "openai";
-import { FaPaperPlane, FaUser, FaRobot, FaTimes } from "react-icons/fa";
+import React, { useState, useEffect, useRef } from "react";
+import { FaUser, FaRobot, FaTimes, FaPaperPlane } from "react-icons/fa";
 import chatNotificationSound from "../assets/chat_notification.mp3";
 
-// Initialize OpenAI instance with environment variable API key
-const openai = new OpenAI({
-  apiKey: process.env.REACT_APP_OPEN_AI_KEY,
-  dangerouslyAllowBrowser: true,
-});
-
-const ChatButtonComponent = () => {
+const ChatButtonComponent = ({ theme }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState("");
-  const [unreadMessages, setUnreadMessages] = useState(0);
+  const messagesEndRef = useRef(null);
 
   const notificationSound = new Audio(chatNotificationSound);
 
   useEffect(() => {
-    notificationSound.load(); // Ensure the sound is loaded initially
+    notificationSound.load();
   }, []);
 
   useEffect(() => {
-    if (isOpen) {
-      sendMessage("Hello! How can I assist you today?", "assistant");
+    if (isOpen && chatMessages.length === 0) {
+      const welcomeMessage = {
+        role: "assistant",
+        content: "Hello! How can I assist you today?",
+      };
+      setChatMessages([welcomeMessage]);
     }
   }, [isOpen]);
 
   useEffect(() => {
-    if (chatMessages.length > 0 && !isOpen) {
-      setUnreadMessages((prev) => prev + 1);
-    }
-  }, [chatMessages, isOpen]);
-
-  useEffect(() => {
-    if (unreadMessages > 0) {
-      document.title = `(${unreadMessages}) New Message - Bharat Gupta`;
-      notificationSound.play();
-    } else {
-      document.title = "Bharat Gupta";
-    }
-  }, [unreadMessages, notificationSound]);
-
-  useEffect(() => {
-    // Ensure chat is closed on page refresh
-    const handleBeforeUnload = () => {
-      setIsOpen(false);
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, []);
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages]);
 
   const sendMessage = async (content, role) => {
-    // Limit message to maximum 50 words
+    if (!content.trim()) return;
     const limitedContent = content.split(" ").slice(0, 50).join(" ");
     const newMessage = { role, content: limitedContent };
-    setChatMessages((prevMessages) => [...prevMessages, newMessage]);
+    setChatMessages((prev) => [...prev, newMessage]);
     setIsSending(true);
-    setError(""); // Reset error
+    setError("");
 
     try {
-      const response = await fetch("https://chat-gpt26.p.rapidapi.com", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-RapidAPI-Key":
-            "135d7f1870mshc25defd42387803p104571jsn47d659645e77",
-        },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo-0125",
-          messages: [{ role: "user", content: limitedContent }],
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const completion = await response.json();
-      const assistantMessage = completion.choices[0].message.content;
-      const newAssistantMessage = {
-        role: "assistant",
-        content: assistantMessage,
-      };
-
-      setChatMessages((prevMessages) => [...prevMessages, newAssistantMessage]);
-    } catch (error) {
-      console.error("Error:", error);
+      const assistantMessage = "This is a mock response from assistant.";
+      setTimeout(() => {
+        setChatMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: assistantMessage },
+        ]);
+        setIsSending(false);
+      }, 800);
+    } catch (err) {
       setError("Oops! Something went wrong. Please try again later.");
-    } finally {
       setIsSending(false);
     }
   };
 
-  const handleKeyPress = (event) => {
-    if (event.key === "Enter" && message.trim() !== "" && !isSending) {
-      sendMessage(message, "user");
-      setMessage("");
-    }
-  };
-
-  const handleSendClick = () => {
-    if (message.trim() !== "" && !isSending) {
-      sendMessage(message, "user");
-      setMessage("");
-    }
+  const handleSend = () => {
+    sendMessage(message, "user");
+    setMessage("");
   };
 
   const toggleChatWindow = () => {
-    if (isOpen) {
-      resetChatState();
-    }
     setIsOpen(!isOpen);
-    setUnreadMessages(0); // Reset unread messages when chat is opened/closed
   };
 
-  const resetChatState = () => {
-    setChatMessages([]);
-    setMessage("");
-    setError("");
-  };
+  const isDark = theme === "dark";
 
   return (
     <div>
       {!isOpen && (
         <button
           onClick={toggleChatWindow}
-          className="bg-gray-700 text-white px-4 py-2 rounded-full fixed bottom-4 right-4 transform hover:scale-105 transition-transform duration-300 ease-in-out"
+          className={`px-4 py-2 rounded-full fixed bottom-4 right-4 z-50 flex items-center space-x-2 hover:scale-105 transition-transform duration-300 ${
+            isDark ? "bg-gray-700 text-white" : "bg-yellow-400 text-gray-900"
+          }`}
         >
-          <span className="flex items-center">
-            <span className="mr-2 text-lg">💬</span>
-            <span className="text-lg font-semibold">Let's Chat</span>
-          </span>
+          <span>💬</span>
+          <span className="font-semibold">Chat</span>
         </button>
       )}
+
       {isOpen && (
-        <div className="chat-window bg-gray-200 shadow-lg rounded-lg p-4 flex flex-col h-80 w-80 fixed bottom-20 right-4 transform hover:scale-100 transition-transform duration-300 ease-in-out">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-bold text-gray-800">👋 Hey there!</h3>
+        <div
+          className={`fixed bottom-4 right-4 md:right-8 w-[95%] max-w-md h-[80vh] md:h-[500px] shadow-lg rounded-xl flex flex-col z-50 transition-colors duration-300 ${
+            isDark ? "bg-gray-800 text-white" : "bg-white text-gray-900"
+          }`}
+        >
+          {/* Header */}
+          <div
+            className={`flex justify-between items-center p-4 border-b transition-colors duration-300 ${
+              isDark ? "border-gray-700" : "border-gray-300"
+            }`}
+          >
+            <h3 className="text-lg font-bold">👋 Chat with me</h3>
             <button
               onClick={toggleChatWindow}
-              className="text-gray-800 hover:text-gray-600 focus:outline-none"
+              className={isDark ? "text-gray-300 hover:text-gray-100" : "text-gray-800 hover:text-gray-600"}
             >
               <FaTimes />
             </button>
           </div>
-          <div className="chat-area overflow-y-auto flex-grow p-2 rounded-lg bg-white">
-            {chatMessages.map((msg, index) => (
+
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-3 flex flex-col space-y-2">
+            {chatMessages.map((msg, idx) => (
               <div
-                key={index}
-                className={`mb-2 p-2 rounded-lg max-w-xs ${
+                key={idx}
+                className={`p-2 rounded-lg max-w-[80%] ${
                   msg.role === "user"
-                    ? "bg-white text-gray-800 shadow-md self-end text-right"
-                    : "bg-gray-100 text-gray-800 shadow-md self-start"
+                    ? `self-end shadow ${isDark ? "bg-gray-700 text-white" : "bg-gray-100 text-gray-900"}`
+                    : `self-start shadow ${isDark ? "bg-gray-600 text-white" : "bg-gray-100 text-gray-900"}`
                 }`}
               >
                 {msg.role === "user" ? (
                   <div className="flex items-center justify-end">
                     <span className="mr-2">{msg.content}</span>
-                    <FaUser className="text-gray-700" />
+                    <FaUser className={isDark ? "text-gray-300" : "text-gray-700"} />
                   </div>
                 ) : (
                   <div className="flex items-center">
-                    <FaRobot className="text-gray-500 mr-2" />
+                    <FaRobot className={isDark ? "text-gray-400 mr-2" : "text-gray-500 mr-2"} />
                     <span>{msg.content}</span>
                   </div>
                 )}
               </div>
             ))}
             {isSending && (
-              <div className="flex items-center justify-start mt-2">
-                <span className="animate-pulse mr-2">...</span>
-                <FaRobot className="text-gray-500" />
+              <div className="flex items-center space-x-2 animate-pulse">
+                <span>...</span>
+                <FaRobot className={isDark ? "text-gray-400" : "text-gray-500"} />
               </div>
             )}
-            {error && (
-              <div className="text-red-500 mt-2 text-center">
-                {error}
-                <div className="text-gray-500 mt-2 text-center">
-                  Feel free to contact me directly at{" "}
-                  <a
-                    href="mailto:Bharatguptawork07@gmail.com"
-                    className="text-blue-500 underline"
-                  >
-                    Bharatguptawork07@gmail.com
-                  </a>
-                </div>
-              </div>
-            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input */}
+          <div
+            className={`flex border-t p-3 space-x-2 transition-colors duration-300 ${
+              isDark ? "border-gray-700" : "border-gray-300"
+            }`}
+          >
+            <input
+              type="text"
+              className={`flex-1 p-2 rounded-lg border focus:outline-none focus:ring-2 ${
+                isDark
+                  ? "border-gray-600 bg-gray-700 text-white focus:ring-yellow-400"
+                  : "border-gray-300 bg-white text-gray-900 focus:ring-yellow-400"
+              }`}
+              placeholder="Type a message..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+            />
+            <button
+              onClick={handleSend}
+              className={`p-2 rounded-lg transition ${
+                isDark ? "bg-yellow-400 text-gray-900 hover:bg-yellow-500" : "bg-yellow-400 text-white hover:bg-yellow-500"
+              }`}
+            >
+              <FaPaperPlane />
+            </button>
           </div>
         </div>
       )}

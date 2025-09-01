@@ -12,6 +12,7 @@ import ChatButton from "./components/ChatComponent";
 
 export default function App() {
   const [profilePicUrl, setProfilePicUrl] = useState("");
+  const [theme, setTheme] = useState("light"); // "light" or "dark"
 
   const typingHomeRef = useRef(null);
   const aboutUsRef = useRef(null);
@@ -34,14 +35,26 @@ export default function App() {
   }, []);
 
   const scrollToSection = (ref) => {
-    window.scrollTo({
-      top: ref.current.offsetTop,
-      behavior: "smooth",
-    });
+    if (ref && ref.current) {
+      const navbarHeight = 64; // adjust if navbar height changes
+      const elementPosition =
+        ref.current.getBoundingClientRect().top + window.pageYOffset;
+      const offsetPosition = elementPosition - navbarHeight;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light");
   };
 
   return (
-    <div>
+    <div className={theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-gray-900"}>
+      {/* Pass theme and toggleTheme to NavBar for a toggle button */}
       <NavBarComponent
         scrollToSection={scrollToSection}
         refs={{
@@ -51,7 +64,10 @@ export default function App() {
           skillsRef,
           mediumNotionRef,
         }}
+        theme={theme}
+        toggleTheme={toggleTheme}
       />
+
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div ref={typingHomeRef}>
@@ -62,20 +78,20 @@ export default function App() {
           />
         </div>
         <div ref={aboutUsRef}>
-          <AboutUs profilePicUrl={profilePicUrl} />
+          <AboutUs profilePicUrl={profilePicUrl} theme={theme} />
         </div>
         <div ref={experienceRef}>
-          <WorkExperience />
+          <WorkExperience theme={theme} />
         </div>
         <div ref={skillsRef}>
-          <SkillsComponent />
+          <SkillsComponent theme={theme} />
         </div>
         <div ref={mediumNotionRef}>
-          <MediumNotionComponent />
+          <MediumNotionComponent theme={theme} />
         </div>
       </div>
-      <FooterComponent />
-      {/* Chat Button positioned in the bottom right */}
+
+      <FooterComponent theme={theme} />
       <ChatButton />
     </div>
   );

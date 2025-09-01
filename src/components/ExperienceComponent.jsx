@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { getDocs, collection } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
-import AccordionComponent from "./AccordionComponent";
+import { FiBriefcase } from "react-icons/fi";
 
-function WorkExperience() {
+function WorkExperience({ theme }) {
   const [experiences, setExperiences] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -24,17 +24,15 @@ function WorkExperience() {
           id: doc.id,
           ...doc.data(),
         }));
-        const sortedExperiences = experienceList[0].experience.sort((a, b) => {
-          // Extract year from the "dates" string
-          const getYear = (dateStr) => {
-            if (dateStr.includes("Present")) return 9999; // treat "Present" as far future
-            const parts = dateStr.split(" - ");
-            return parseInt(parts[1]?.split(" ").pop()); // use end year
-          };
 
-          return getYear(b.dates) - getYear(a.dates); // descending
+        const sortedExperiences = experienceList[0].experience.sort((a, b) => {
+          const getYear = (dateStr) => {
+            if (dateStr.includes("Present")) return 9999;
+            const parts = dateStr.split(" - ");
+            return parseInt(parts[1]?.split(" ").pop());
+          };
+          return getYear(b.dates) - getYear(a.dates);
         });
-        console.log("Fetched experiences:", sortedExperiences);
 
         setExperiences(sortedExperiences);
         setLoading(false);
@@ -47,25 +45,80 @@ function WorkExperience() {
     fetchExperiences();
   }, []);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      transition={{ duration: 1.5 }}
-      className="flex relative overflow-hidden flex-col text-left md:flex-row max-w-full px-10 justify-evenly mx-auto"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className={`flex flex-col items-center px-4 sm:px-6 md:px-12 py-20 transition-colors duration-300 ${
+        theme === "dark" ? "bg-gray-900" : "bg-gray-50"
+      }`}
     >
-      <div className="flex relative overflow-hidden flex-col text-left md:flex-row max-w-full px-10 justify-evenly mx-auto">
-        <h3 className="absolute top-24 uppercase tracking-[20px] text-gray-500 text-2xl">
-          Experience
-        </h3>
-        <div className="max-w-full mt-40 flex space-x-5 overflow-x-scroll p-10 snap-x snap-mandatory scrollbar-track-gray-400/20 scrollbar-thumb-[#F7AB0A]/80 scrollbar-thin">
-          {loading ? (
-            <p>Loading...</p>
-          ) : (
-            experiences && <AccordionComponent experiences={experiences} />
-          )}
+      {/* Title */}
+      <h3
+        className={`uppercase tracking-[12px] text-2xl sm:text-3xl text-center mb-16 transition-colors duration-300 ${
+          theme === "dark" ? "text-gray-400" : "text-gray-500"
+        }`}
+      >
+        Work Experience
+      </h3>
+
+      {loading ? (
+        <p
+          className={`mt-10 text-center transition-colors duration-300 ${
+            theme === "dark" ? "text-gray-400" : "text-gray-500"
+          }`}
+        >
+          Loading...
+        </p>
+      ) : (
+        <div className="w-full max-w-5xl flex flex-col space-y-6">
+          {experiences.map((exp, idx) => (
+            <motion.div
+              key={idx}
+              variants={itemVariants}
+              whileHover={{ scale: 1.03 }}
+              className={`p-6 sm:p-8 rounded-2xl shadow-lg transition-transform duration-300 ${
+                theme === "dark"
+                  ? "bg-gray-800 text-gray-200"
+                  : "bg-white text-gray-700"
+              }`}
+            >
+              <div className="flex items-center mb-3">
+                <FiBriefcase
+                  className={`text-2xl mr-3 transition-colors duration-300 ${
+                    theme === "dark" ? "text-yellow-400" : "text-yellow-500"
+                  }`}
+                />
+                <h4 className="text-lg sm:text-xl font-semibold">
+                  {exp.position}
+                </h4>
+              </div>
+              <p className="text-sm sm:text-base mb-1">{exp.company}</p>
+              <span className="text-xs sm:text-sm italic text-gray-400 mb-3">
+                {exp.dates}
+              </span>
+              {exp.responsibilities && (
+                <ul className="list-disc list-inside space-y-1 text-sm sm:text-base">
+                  {exp.responsibilities.map((res, i) => (
+                    <li key={i}>{res}</li>
+                  ))}
+                </ul>
+              )}
+            </motion.div>
+          ))}
         </div>
-      </div>
+      )}
     </motion.div>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const MediumNotionComponent = () => {
+const MediumNotionComponent = ({ theme = "light" }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -11,17 +11,12 @@ const MediumNotionComponent = () => {
         const response = await fetch(
           "https://api.rss2json.com/v1/api.json?rss_url=https://medium.com/feed/@bharat.gupta1407"
         );
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
+        if (!response.ok) throw new Error("Network response was not ok");
         const data = await response.json();
-        if (data.items) {
-          setPosts(data.items);
-        } else {
-          throw new Error("No posts found");
-        }
-      } catch (error) {
-        setError(error.message);
+        if (data.items) setPosts(data.items);
+        else throw new Error("No posts found");
+      } catch (err) {
+        setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -31,23 +26,52 @@ const MediumNotionComponent = () => {
   }, []);
 
   if (loading) {
-    return <div className="text-center text-gray-500">Loading...</div>;
+    return (
+      <div
+        className={`text-center py-20 transition-colors duration-300 ${
+          theme === "dark" ? "text-gray-400" : "text-gray-500"
+        }`}
+      >
+        Loading posts...
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-center text-red-500">Error: {error}</div>;
+    return (
+      <div
+        className={`text-center py-20 transition-colors duration-300 ${
+          theme === "dark" ? "text-red-400" : "text-red-500"
+        }`}
+      >
+        Error: {error}
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-full px-10  py-10 mx-auto">
-      <h1 className="text-center mt-10 uppercase tracking-[20px] text-gray-500 text-2xl">
+    <div
+      className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-20 transition-colors duration-300 ${
+        theme === "dark" ? "bg-gray-900" : "bg-gray-50"
+      }`}
+    >
+      <h1
+        className={`text-center text-2xl tracking-[15px] uppercase mb-12 transition-colors duration-300 ${
+          theme === "dark" ? "text-gray-400" : "text-gray-500"
+        }`}
+      >
         Blog
       </h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {posts.map((post) => (
-          <div
+          <a
             key={post.guid}
-            className="bg-white shadow-md rounded-lg overflow-hidden transition-transform transform hover:scale-105"
+            href={post.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`rounded-2xl shadow-lg overflow-hidden transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl flex flex-col transition-colors duration-300 ${
+              theme === "dark" ? "bg-gray-800" : "bg-white"
+            }`}
           >
             {post.thumbnail && (
               <img
@@ -56,22 +80,30 @@ const MediumNotionComponent = () => {
                 className="w-full h-48 object-cover"
               />
             )}
-            <div className="p-4">
-              <h2 className="text-lg font-semibold mb-2">
-                <a
-                  href={post.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline"
-                >
-                  {post.title}
-                </a>
+            <div className="p-4 flex flex-col flex-1">
+              <h2
+                className={`text-lg font-semibold mb-2 transition-colors duration-300 ${
+                  theme === "dark" ? "text-gray-200" : "text-gray-800"
+                }`}
+              >
+                {post.title.length > 60
+                  ? post.title.slice(0, 60) + "..."
+                  : post.title}
               </h2>
-              <p className="text-gray-700">
-                {post.description.replace(/<[^>]+>/g, "").slice(0, 100)}...
+              <p
+                className={`flex-1 transition-colors duration-300 ${
+                  theme === "dark" ? "text-gray-400" : "text-gray-600"
+                }`}
+              >
+                {post.description.replace(/<[^>]+>/g, "").slice(0, 120)}...
               </p>
+              <span
+                className="mt-4 font-semibold hover:underline text-teal-500"
+              >
+                Read more →
+              </span>
             </div>
-          </div>
+          </a>
         ))}
       </div>
     </div>
