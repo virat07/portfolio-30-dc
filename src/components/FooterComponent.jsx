@@ -11,10 +11,10 @@ const FooterComponent = () => {
             <p className="mt-2">
               Email:{" "}
               <a
-                href="mailto:Bharatguptawork07@gmail.com"
+                href="mailto:bharat.gupta1407@gmail.com"
                 className="hover:text-gray-400"
               >
-                Bharatguptawork07@gmail.com
+                Bharat.gupta1407@gmail.com
               </a>
             </p>
             <p className="mt-2">

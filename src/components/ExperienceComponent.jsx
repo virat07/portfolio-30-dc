@@ -24,10 +24,19 @@ function WorkExperience() {
           id: doc.id,
           ...doc.data(),
         }));
+        const sortedExperiences = experienceList[0].experience.sort((a, b) => {
+          // Extract year from the "dates" string
+          const getYear = (dateStr) => {
+            if (dateStr.includes("Present")) return 9999; // treat "Present" as far future
+            const parts = dateStr.split(" - ");
+            return parseInt(parts[1]?.split(" ").pop()); // use end year
+          };
 
-        console.log("Fetched experiences:", experienceList);
+          return getYear(b.dates) - getYear(a.dates); // descending
+        });
+        console.log("Fetched experiences:", sortedExperiences);
 
-        setExperiences(experienceList[0].experience);
+        setExperiences(sortedExperiences);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching documents:", error);
