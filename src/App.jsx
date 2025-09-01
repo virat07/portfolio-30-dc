@@ -34,18 +34,17 @@ export default function App() {
     fetchProfilePic();
   }, []);
 
-  const scrollToSection = (ref) => {
-    if (ref && ref.current) {
-      const navbarHeight = 64; // adjust if navbar height changes
-      const elementPosition =
-        ref.current.getBoundingClientRect().top + window.pageYOffset;
-      const offsetPosition = elementPosition - navbarHeight;
+  const scrollToSection = (element) => {
+    if (!element) return;
+    const navbarHeight = 64;
+    const elementPosition =
+      element.getBoundingClientRect().top + window.pageYOffset;
+    const offsetPosition = elementPosition - navbarHeight;
 
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth",
-      });
-    }
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: "smooth",
+    });
   };
 
   const toggleTheme = () => {
@@ -53,7 +52,11 @@ export default function App() {
   };
 
   return (
-    <div className={theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-gray-900"}>
+    <div
+      className={
+        theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-gray-900"
+      }
+    >
       {/* Pass theme and toggleTheme to NavBar for a toggle button */}
       <NavBarComponent
         scrollToSection={scrollToSection}
@@ -74,7 +77,12 @@ export default function App() {
           <TypingHomeComponent
             profilePicUrl={profilePicUrl}
             scrollToSection={scrollToSection}
-            refs={{ aboutUsRef, experienceRef, skillsRef, mediumNotionRef }}
+            refs={{
+              about: aboutUsRef,
+              experience: experienceRef,
+              skills: skillsRef,
+              blog: mediumNotionRef,
+            }}
           />
         </div>
         <div ref={aboutUsRef}>

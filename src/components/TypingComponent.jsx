@@ -15,15 +15,18 @@ const TypingHomeComponent = ({ profilePicUrl, scrollToSection, refs }) => {
   });
 
   const buttons = [
-    { label: "About", ref: refs.aboutUsRef },
-    { label: "Experience", ref: refs.experienceRef },
-    { label: "Skills", ref: refs.skillsRef },
-    { label: "Blog", ref: refs.mediumNotionRef },
+    { label: "About", ref: refs.about },
+    { label: "Experience", ref: refs.experience },
+    { label: "Skills", ref: refs.skills },
+    { label: "Blog", ref: refs.mediumNotion },
   ];
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center text-center overflow-hidden px-4 md:px-0">
-      <BackgroundCircles />
+    <div className="h-screen flex flex-col items-center justify-center text-center overflow-hidden px-4 md:px-0 relative">
+      {/* Background Circles behind everything and pointer-events none */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <BackgroundCircles />
+      </div>
 
       {/* Profile Image */}
       <motion.img
@@ -32,11 +35,11 @@ const TypingHomeComponent = ({ profilePicUrl, scrollToSection, refs }) => {
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ duration: 1.2, type: "spring", stiffness: 120 }}
-        className="relative rounded-full h-36 w-36 md:h-48 md:w-48 mx-auto object-cover shadow-xl"
+        className="relative rounded-full h-36 w-36 md:h-48 md:w-48 mx-auto object-cover shadow-xl z-10"
       />
 
       {/* Text */}
-      <div className="z-20 mt-6">
+      <div className="z-10 mt-6">
         <h2 className="text-sm md:text-base uppercase text-gray-500 tracking-[10px] mb-2">
           Software Engineer
         </h2>
@@ -47,13 +50,17 @@ const TypingHomeComponent = ({ profilePicUrl, scrollToSection, refs }) => {
       </div>
 
       {/* Navigation Buttons */}
-      <div className="pt-6 flex flex-wrap justify-center gap-4 md:gap-6">
+      <div className="pt-6 flex flex-wrap justify-center gap-4 md:gap-6 z-10">
         {buttons.map((btn, idx) => (
           <motion.button
             key={idx}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => scrollToSection(btn.ref)}
+            onClick={() => {
+              if (btn.ref && btn.ref.current) {
+                scrollToSection(btn.ref.current);
+              }
+            }}
             className="bg-teal-600 text-white font-semibold py-2 px-5 rounded-full shadow-lg hover:shadow-xl transition duration-300 ease-in-out"
           >
             {btn.label}
