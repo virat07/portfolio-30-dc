@@ -70,7 +70,7 @@ const DownloadResumeComponent = () => {
           >
             <MdOutlinePreview />
             <a
-              href="/GuptaBharat,25.pdf"
+              href="/GuptaBharat,26.pdf"
               target="_blank"
               className="text-gray-800"
               onClick={() => setIsOpen(!isOpen)}
@@ -84,7 +84,7 @@ const DownloadResumeComponent = () => {
           >
             <MdOutlineFileDownload />
             <a
-              href="/GuptaBharat,25.pdf"
+              href="/GuptaBharat,26.pdf"
               download="Bharat Gupta Resume"
               target="_blank"
               className="text-gray-800"
