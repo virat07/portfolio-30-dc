@@ -1,4 +1,5 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import NavBarComponent from "./components/NavBar";
 import FooterComponent from "./components/FooterComponent";
 import AboutUs from "./components/AboutUsComponent";
@@ -13,6 +14,7 @@ import DriverStandings from "./components/DriverStandings";
 export default function App() {
   const profilePicUrl = "/027A1497.jpeg";
   const theme = "dark"; // Enforce dark theme globally for the premium command console look
+  const [f1Complete, setF1Complete] = useState(false);
 
   const typingHomeRef = useRef(null);
   const aboutUsRef = useRef(null);
@@ -71,8 +73,20 @@ export default function App() {
 
           {/* Right Column: AI Console Simulator */}
           <div className="lg:col-span-5 lg:sticky lg:top-24 mt-12 lg:mt-0">
-            <AgentConsole theme={theme} />
-            <DriverStandings />
+            <AgentConsole theme={theme} onF1Complete={setF1Complete} />
+            <AnimatePresence>
+              {f1Complete && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0, y: 20 }}
+                  animate={{ opacity: 1, height: "auto", y: 0 }}
+                  exit={{ opacity: 0, height: 0, y: 20 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  className="overflow-hidden"
+                >
+                  <DriverStandings />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 

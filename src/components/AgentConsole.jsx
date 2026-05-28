@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiPlay, FiCpu, FiMessageSquare, FiTrendingUp } from "react-icons/fi";
 
-const AgentConsole = ({ theme = "light" }) => {
+const AgentConsole = ({ theme = "light", onF1Complete }) => {
   const [activeTab, setActiveTab] = useState("Digital Twin");
   
   // F1 Simulator States
@@ -38,6 +38,7 @@ const AgentConsole = ({ theme = "light" }) => {
     setF1Simulating(true);
     setF1Logs([]);
     setShowF1Results(false);
+    if (onF1Complete) onF1Complete(false);
 
     simulatedLogs.forEach((log) => {
       setTimeout(() => {
@@ -48,6 +49,7 @@ const AgentConsole = ({ theme = "light" }) => {
     setTimeout(() => {
       setF1Simulating(false);
       setShowF1Results(true);
+      if (onF1Complete) onF1Complete(true);
     }, 4800);
   };
 
@@ -305,6 +307,7 @@ const AgentConsole = ({ theme = "light" }) => {
                         onClick={() => {
                           setShowF1Results(false);
                           setF1Logs([]);
+                          if (onF1Complete) onF1Complete(false);
                         }}
                         className="mt-3 text-xs text-gray-500 hover:text-white underline"
                       >
