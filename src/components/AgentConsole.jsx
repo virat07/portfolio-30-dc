@@ -65,41 +65,130 @@ const AgentConsole = ({ theme = "light", onF1Complete }) => {
     }
   }, [messages, isTyping]);
 
-  // Digital Twin Responses
-  const predefinedAnswers = {
-    hire: "Bharat stands out because of his rare combination of 6+ years of full-stack expertise (React, Node, Python) and cutting-edge work in AI. He has engineered agentic workflows that slash component build times from days to minutes, and scaled platforms to $500K/mo in revenue.",
-    rocket: "At Rocket Companies, Bharat leads engineering initiatives building developer agents (Figma MCP + Claude), MR code review automations, and CI/CD pipelines. He also scaled their non-mortgage marketplace platforms and improved performance scores by 300%.",
-    projects: "His main projects are: 1) F1 Predictions: An ML dashboard using Gradient Boosting & sentiment analysis. 2) Signalist: A stock market dashboard with TradingView graphs. 3) Stock-bot: A Python stock screener screening tickers across 4 signal modules.",
-    skills: "His core stack covers Languages (JavaScript, TypeScript, Python, SQL, C++), Frontend (React.js, React Native, Next.js, Tailwind, Chakra), Backend (Node.js, Express, REST APIs, Firebase), and AI Tools (Cursor, Claude, Kiro, Lovable).",
+  // Digital Twin Responses Knowledge Base
+  const kbase = {
+    summary: {
+      keywords: ["summary", "about", "who is", "who are", "background", "bio", "profile", "overview", "describe"],
+      response: "Bharat Gupta is a California-based Software Engineer with 6+ years of experience building high-performance React applications and full-stack systems. He specializes in React, Node, Python, and cloud services (AWS/GCP), and focuses on accelerating development using advanced agentic AI workflows."
+    },
+    experience_rocket: {
+      keywords: ["rocket", "current job", "present", "now", "gitlab", "figma", "mcp", "kiro", "claude", "mortgage", "marketplace", "vitals", "lcp", "cls", "security"],
+      response: "At Rocket Companies (Jan 2025 – Present) as a Software Engineer, Bharat:\n" +
+                "• Built agentic development workflows using Figma MCP, Kiro, and Claude to auto-generate React components & tests — slashing component build times from ~1 day to minutes.\n" +
+                "• Engineered GitLab MR review agents and CI/CD pipeline automation generators.\n" +
+                "• Scaled marketplace platforms to ~$500K/mo in revenue through SEO and conversion optimizations.\n" +
+                "• Improved Core Web Vitals (LCP, CLS), raising performance scores by 300%.\n" +
+                "• Cut frontend security vulnerabilities by 30% via automated scanning pipelines."
+    },
+    experience_gsl: {
+      keywords: ["great software", "gsl", "gslab", "india", "pune", "prior", "previous", "before", "2018", "2022", "gs lab"],
+      response: "At Great Software Laboratory (GS Lab) in Pune, India (Aug 2018 – Jul 2022) as a Software Engineer, Bharat:\n" +
+                "• Led enterprise frontend development in React, establishing reusable component libraries that raised engagement by 25%.\n" +
+                "• Developed responsive, ad-integrated web platforms driving a 50% increase in CTR.\n" +
+                "• Optimized data pipelines to reduce application response times by 30%."
+    },
+    education_csusb: {
+      keywords: ["csusb", "san bernardino", "masters", "master", "m.s.", "ms", "california state", "chatbot evaluation", "thesis"],
+      response: "Bharat completed his M.S. in Computer Science at California State University, San Bernardino (Aug 2022 – May 2024) with a GPA of 3.72/4.0. For his project, he built a Firebase + React chatbot evaluation panel that reduced assessment times by 30%."
+    },
+    education_chitkara: {
+      keywords: ["chitkara", "bachelor", "degree", "b.e.", "be", "university", "college", "india", "himachal"],
+      response: "Bharat holds a B.E. in Computer Science from Chitkara University in Himachal Pradesh, India (Aug 2015 – Jul 2019) with a GPA of 3.50/4.0."
+    },
+    project_f1: {
+      keywords: ["f1", "predictions", "formula", "telemetry", "fastf1", "predictions", "leaderboard", "supabase", "scikit", "gradient boosting"],
+      response: "His F1 2026 Predictions Dashboard is a full-stack platform built with React 18, Framer Motion, and Supabase real-time channels. It features an automated ML pipeline using Scikit-Learn Gradient Boosting and NLTK VADER sentiment analysis, fetching telemetry data via the FastF1 API, and auto-deploying via GitHub Actions."
+    },
+    project_signalist: {
+      keywords: ["signalist", "market digest", "newsletter", "openai", "tradingview", "charts", "email"],
+      response: "Signalist is an automated stock market insights platform built with React and TradingView charts. It utilizes an OpenAI API pipeline to generate daily AI market summaries and automatically delivers them to subscribers via styled HTML newsletters."
+    },
+    project_stockbot: {
+      keywords: ["stock-bot", "stockbot", "screener", "discord", "webhook", "nasdaq", "s&p"],
+      response: "Stock-bot is a Python stock screening and alerts engine. It evaluates S&P 500 and Nasdaq 100 tickers across 4 signal modules—technical (RSI, MACD), fundamental, momentum, and sentiment (NLTK VADER). It runs daily via GitHub Actions and sends alerts to Discord."
+    },
+    skills_languages: {
+      keywords: ["languages", "programming language", "python", "javascript", "typescript", "c++", "sql", "code in"],
+      response: "Bharat is proficient in JavaScript, TypeScript, Python, SQL, C, and C++."
+    },
+    skills_frontend: {
+      keywords: ["frontend", "frameworks", "react", "next", "react native", "css", "tailwind", "shadcn", "material ui", "chakra"],
+      response: "His frontend skills include: React.js, React Native, Next.js, HTML5, CSS3, ES6+, Redux, ShadCN, Chakra UI, Material UI, TailwindCSS, SCSS, Emotion, and design tools like Figma and Zeplin."
+    },
+    skills_backend: {
+      keywords: ["backend", "database", "databases", "cloud", "aws", "gcp", "node", "express", "firebase", "supabase", "mongodb", "mysql", "dynamodb", "ci/cd", "gitlab"],
+      response: "His backend, cloud, and database skills cover: Node.js, Express.js, REST APIs, Supabase, Firebase, AWS (EC2, Lambda, S3), GCP (BigQuery, Firestore, Cloud Functions), MongoDB, DynamoDB, MySQL, Snowflake, and CI/CD pipelines."
+    },
+    skills_ai: {
+      keywords: ["ai tools", "ai stack", "copilot", "cursor", "claude", "kiro", "lovable", "windsurf", "hugging face"],
+      response: "Bharat leverages cutting-edge AI tools to boost developer velocity, including: Cursor, Claude, Kiro, Lovable, Windsurf, GitHub Copilot, Codex, and Hugging Face."
+    },
+    contact: {
+      keywords: ["contact", "email", "phone", "call", "mail", "hire", "address", "location", "connect", "reach", "resume", "github", "linkedin"],
+      response: "You can reach Bharat Gupta via:\n" +
+                "• Email: Bharatguptawork07@gmail.com\n" +
+                "• Phone: +1 (840) 699-7874\n" +
+                "• Location: California, USA\n" +
+                "• GitHub: github.com/virat07\n" +
+                "• LinkedIn: linkedin.com/in/bharat-gupta-07/"
+    }
   };
 
   const handleSendMessage = (textKey) => {
     let question = "";
     let answer = "";
 
-    if (textKey === "hire") {
-      question = "Why should I hire Bharat?";
-      answer = predefinedAnswers.hire;
-    } else if (textKey === "rocket") {
-      question = "Tell me about his Rocket Companies experience.";
-      answer = predefinedAnswers.rocket;
-    } else if (textKey === "projects") {
-      question = "What are his featured projects?";
-      answer = predefinedAnswers.projects;
-    } else if (textKey === "skills") {
-      question = "What is his core technology stack?";
-      answer = predefinedAnswers.skills;
+    if (textKey) {
+      if (textKey === "hire") {
+        question = "Why should I hire Bharat?";
+        answer = "Bharat stands out because of his rare combination of 6+ years of full-stack expertise (React, Node, Python) and cutting-edge work in AI. He has engineered agentic workflows that slash component build times from days to minutes, and scaled platforms to $500K/mo in revenue.";
+      } else if (textKey === "rocket") {
+        question = "Tell me about his Rocket Companies experience.";
+        answer = kbase.experience_rocket.response;
+      } else if (textKey === "projects") {
+        question = "What are his featured projects?";
+        answer = "His main projects are:\n1) F1 Predictions: An ML dashboard using Gradient Boosting & sentiment analysis.\n2) Signalist: A stock market platform with TradingView graphs and OpenAI AI digests.\n3) Stock-bot: A Python stock screener with Discord notifications.";
+      } else if (textKey === "skills") {
+        question = "What is his core technology stack?";
+        answer = "His core stack covers:\n• Languages: JavaScript, TypeScript, Python, SQL, C++\n• Frontend: React, Next.js, Tailwind, React Native\n• Backend & Database: Node.js, AWS, GCP, Supabase, Firebase, MongoDB, MySQL\n• AI Tools: Cursor, Claude, Lovable, Windsurf";
+      }
     } else {
       if (!inputText.trim()) return;
       question = inputText;
       setInputText("");
-      // General NLP matcher
+
       const qLower = question.toLowerCase();
-      if (qLower.includes("hire") || qLower.includes("why")) answer = predefinedAnswers.hire;
-      else if (qLower.includes("rocket") || qLower.includes("experience") || qLower.includes("work")) answer = predefinedAnswers.rocket;
-      else if (qLower.includes("project") || qLower.includes("portfolio")) answer = predefinedAnswers.projects;
-      else if (qLower.includes("skill") || qLower.includes("language") || qLower.includes("tech") || qLower.includes("stack")) answer = predefinedAnswers.skills;
-      else answer = "I'm trained on Bharat's resume details. Ask me about his projects (F1 Predictor, Signalist), skills (React, Node, Python), or work experience (Rocket Companies, Great Software Laboratory)!";
+      let bestCategory = null;
+      let maxMatches = 0;
+
+      Object.keys(kbase).forEach((cat) => {
+        let matches = 0;
+        kbase[cat].keywords.forEach((keyword) => {
+          if (qLower.includes(keyword)) {
+            matches += keyword.length; 
+          }
+        });
+
+        if (matches > maxMatches) {
+          maxMatches = matches;
+          bestCategory = cat;
+        }
+      });
+
+      if (bestCategory && maxMatches > 2) {
+        answer = kbase[bestCategory].response;
+      } else {
+        // Fallback checks
+        if (qLower.includes("hello") || qLower.includes("hi ") || qLower.includes("hey")) {
+          answer = "Hello! I am Bharat's Digital Twin Agent. Ask me anything about his work experience (Rocket Companies, GS Lab), education (CSUSB), projects (F1 Dashboard, Signalist), skills, or contact info!";
+        } else if (qLower.includes("gpa") || qLower.includes("grades")) {
+          answer = "Bharat maintained stellar grades: 3.72/4.0 GPA for his Master's in Computer Science at CSUSB, and 3.50/4.0 GPA for his Bachelor's at Chitkara University.";
+        } else if (qLower.includes("location") || qLower.includes("live") || qLower.includes("where")) {
+          answer = "Bharat is currently based in California, USA.";
+        } else {
+          answer = "I'm trained on Bharat's resume details. Ask me about his projects (F1 Predictor, Signalist, Stock-bot), skills (React, Node, Python, AWS), education (CSUSB Master's), or work experience (Rocket Companies, GS Lab)!";
+        }
+      }
     }
 
     setMessages((prev) => [...prev, { sender: "user", text: question }]);
