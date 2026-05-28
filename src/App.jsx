@@ -11,7 +11,7 @@ import DriverStandings from "./components/DriverStandings";
 
 export default function App() {
   const profilePicUrl = "/027A1497.jpeg";
-  const [theme, setTheme] = React.useState("dark"); // "dark" mode default for visual mockup look
+  const theme = "dark"; // Enforce dark theme globally for the premium command console look
 
   const typingHomeRef = useRef(null);
   const aboutUsRef = useRef(null);
@@ -32,17 +32,8 @@ export default function App() {
     });
   };
 
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
-  };
-
   return (
-    <div
-      className={
-        theme === "dark" ? "bg-gray-950 text-white" : "bg-white text-gray-900"
-      }
-    >
-      {/* Pass theme and toggleTheme to NavBar for a toggle button */}
+    <div className="bg-gray-950 text-white min-h-screen">
       <NavBarComponent
         scrollToSection={scrollToSection}
         refs={{
@@ -53,7 +44,6 @@ export default function App() {
           mediumNotionRef,
         }}
         theme={theme}
-        toggleTheme={toggleTheme}
       />
 
       {/* Main Content Dashboard */}

@@ -59,17 +59,6 @@ const NavBarComponent = ({ scrollToSection, refs, theme, toggleTheme }) => {
               </button>
             ))}
             <DownloadResumeComponent />
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="ml-4 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition"
-            >
-              {theme === "dark" ? (
-                <FaSun className="text-yellow-400" />
-              ) : (
-                <FaMoon className="text-gray-800" />
-              )}
-            </button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -115,19 +104,6 @@ const NavBarComponent = ({ scrollToSection, refs, theme, toggleTheme }) => {
           >
             <DownloadResumeComponent />
           </div>
-          {/* Theme Toggle */}
-          <button
-            onClick={toggleTheme}
-            className={`mt-2 p-2 rounded-full w-full flex justify-center transition ${
-              theme === "dark" ? "hover:bg-gray-700" : "hover:bg-gray-200"
-            }`}
-          >
-            {theme === "dark" ? (
-              <FaSun className="text-yellow-400" />
-            ) : (
-              <FaMoon className="text-gray-800" />
-            )}
-          </button>
         </div>
       )}
     </nav>
