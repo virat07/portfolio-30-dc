@@ -1,17 +1,17 @@
 import React, { useRef } from "react";
 import NavBarComponent from "./components/NavBar";
 import FooterComponent from "./components/FooterComponent";
-import TypingHomeComponent from "./components/TypingComponent";
 import AboutUs from "./components/AboutUsComponent";
 import WorkExperience from "./components/ExperienceComponent";
 import SkillsComponent from "./components/SkillsComponent";
 import MediumNotionComponent from "./components/MediumNotionComponent";
 import ChatButton from "./components/ChatComponent";
 import AgentConsole from "./components/AgentConsole";
+import DriverStandings from "./components/DriverStandings";
 
 export default function App() {
   const profilePicUrl = "/027A1497.jpeg";
-  const [theme, setTheme] = React.useState("light"); // "light" or "dark"
+  const [theme, setTheme] = React.useState("dark"); // "dark" mode default for visual mockup look
 
   const typingHomeRef = useRef(null);
   const aboutUsRef = useRef(null);
@@ -21,7 +21,7 @@ export default function App() {
 
   const scrollToSection = (element) => {
     if (!element) return;
-    const navbarHeight = 64;
+    const navbarHeight = 80;
     const elementPosition =
       element.getBoundingClientRect().top + window.pageYOffset;
     const offsetPosition = elementPosition - navbarHeight;
@@ -39,7 +39,7 @@ export default function App() {
   return (
     <div
       className={
-        theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-gray-900"
+        theme === "dark" ? "bg-gray-950 text-white" : "bg-white text-gray-900"
       }
     >
       {/* Pass theme and toggleTheme to NavBar for a toggle button */}
@@ -56,25 +56,12 @@ export default function App() {
         toggleTheme={toggleTheme}
       />
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div ref={typingHomeRef}>
-          <TypingHomeComponent
-            profilePicUrl={profilePicUrl}
-            scrollToSection={scrollToSection}
-            refs={{
-              about: aboutUsRef,
-              experience: experienceRef,
-              skills: skillsRef,
-              blog: mediumNotionRef,
-            }}
-          />
-        </div>
-
+      {/* Main Content Dashboard */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
         {/* Two-Column Split Console Grid Layout */}
-        <div className="lg:grid lg:grid-cols-12 lg:gap-10 mt-10 items-start">
+        <div ref={typingHomeRef} className="lg:grid lg:grid-cols-12 lg:gap-10 items-start">
           {/* Left Column: CV Track */}
-          <div className="lg:col-span-7 flex flex-col space-y-16">
+          <div className="lg:col-span-7 flex flex-col space-y-12">
             <div ref={aboutUsRef}>
               <AboutUs profilePicUrl={profilePicUrl} theme={theme} />
             </div>
@@ -89,6 +76,7 @@ export default function App() {
           {/* Right Column: AI Console Simulator */}
           <div className="lg:col-span-5 lg:sticky lg:top-24 mt-12 lg:mt-0">
             <AgentConsole theme={theme} />
+            <DriverStandings />
           </div>
         </div>
 

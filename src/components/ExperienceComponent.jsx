@@ -60,26 +60,15 @@ function WorkExperience({ theme }) {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className={`flex flex-col items-center px-4 sm:px-6 md:px-12 py-20 transition-colors duration-300 ${
-        theme === "dark" ? "bg-gray-900" : "bg-gray-50"
-      }`}
+      className="w-full flex flex-col items-start"
     >
-      {/* Title */}
-      <h3
-        className={`uppercase tracking-[12px] text-2xl sm:text-3xl text-center mb-16 transition-colors duration-300 ${
-          theme === "dark" ? "text-gray-400" : "text-gray-500"
-        }`}
-      >
+      <h3 className="uppercase tracking-[8px] text-sm text-gray-400 font-bold mb-8">
         Work Experience
       </h3>
 
       {loading ? (
-        <p
-          className={`mt-10 text-center transition-colors duration-300 ${
-            theme === "dark" ? "text-gray-400" : "text-gray-500"
-          }`}
-        >
-          Loading...
+        <p className="text-gray-500 font-mono">
+          Loading experiences...
         </p>
       ) : (
         <div className="w-full max-w-4xl relative border-l-2 border-slate-800 ml-4 pl-6 md:pl-8 space-y-10">

@@ -58,50 +58,36 @@ const SkillsComponent = ({ theme = "light" }) => {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className={`flex flex-col items-center px-4 sm:px-6 md:px-12 py-20 transition-colors duration-300 ${
-        theme === "dark" ? "bg-gray-900" : "bg-gray-50"
-      }`}
+      className="w-full flex flex-col items-start"
     >
-      <h3
-        className={`uppercase tracking-[12px] text-2xl sm:text-3xl font-semibold text-center mb-16 transition-colors duration-300 ${
-          theme === "dark" ? "text-gray-400" : "text-gray-500"
-        }`}
-      >
+      <h3 className="uppercase tracking-[8px] text-sm text-gray-400 font-bold mb-8">
         Skills
       </h3>
 
       {loading ? (
-        <p
-          className={`mt-10 text-center transition-colors duration-300 ${
-            theme === "dark" ? "text-gray-400" : "text-gray-500"
-          }`}
-        >
-          Loading...
+        <p className="text-gray-500 font-mono">
+          Loading skills...
         </p>
       ) : (
         <motion.div
-          className="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+          className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4"
           variants={containerVariants}
         >
           {Object.keys(skillsData).map((category, idx) => (
             <motion.div
               key={idx}
               variants={itemVariants}
-              className={`p-6 flex flex-col items-center rounded-2xl shadow-lg transition-transform duration-300 hover:scale-105 ${
-                theme === "dark" ? "bg-gray-800 text-gray-200" : "bg-white text-gray-700"
-              }`}
+              className="p-5 flex flex-col items-start rounded-xl glass-panel shadow-lg transition-transform duration-300 hover:scale-[1.02]"
             >
-              <div className="mb-4">{getIcon(category)}</div>
-              <h4 className="text-xl font-semibold mb-4 text-center">{category}</h4>
-              <div className="flex flex-wrap justify-center gap-2">
+              <div className="flex items-center space-x-2 mb-3">
+                {getIcon(category)}
+                <h4 className="text-sm font-bold text-white uppercase tracking-wider">{category}</h4>
+              </div>
+              <div className="flex flex-wrap gap-2">
                 {skillsData[category].map((skill, i) => (
                   <span
                     key={i}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors duration-300 ${
-                      theme === "dark"
-                        ? "bg-gray-700 text-gray-200 hover:bg-gray-600"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
+                    className="px-2.5 py-0.5 rounded-full text-xs font-mono bg-slate-900/60 text-emerald-400 border border-emerald-500/20"
                   >
                     {skill}
                   </span>
