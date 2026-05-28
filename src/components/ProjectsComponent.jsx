@@ -8,8 +8,8 @@ const projectsData = [
     date: "Apr 2026 - Present",
     description: "Full-stack forecasting dashboard with React 18, Framer Motion, and Supabase real-time channels. Powered by an automated ML pipeline (Scikit-Learn, NLTK VADER sentiment analysis) utilizing the FastF1 telemetry API.",
     tech: ["React 18", "Supabase", "Scikit-Learn", "FastF1 API", "Python"],
-    github: "https://github.com/virat07/f1-predictions",
-    live: "https://bharat-gupta-portfolio.vercel.app", // mock or actual link
+    github: "https://github.com/virat07/f1-2026-predictions",
+    live: "https://f1-2026-predictions.vercel.app/",
   },
   {
     title: "Signalist — Market Insights",
@@ -17,7 +17,7 @@ const projectsData = [
     description: "Real-time stock market insights platform built with React and interactive TradingView charts. Features an event-driven AI news summarizer pipeline (OpenAI API) that sends formatted market digests to subscribers.",
     tech: ["React.js", "OpenAI API", "TradingView", "Tailwind", "Node.js"],
     github: "https://github.com/virat07/signalist_stock_market",
-    live: "https://bharat-gupta-portfolio.vercel.app",
+    live: "https://your-daily-stock-market-newsletter.vercel.app/",
   },
   {
     title: "Stock-bot Screener",
