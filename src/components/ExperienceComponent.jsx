@@ -82,39 +82,40 @@ function WorkExperience({ theme }) {
           Loading...
         </p>
       ) : (
-        <div className="w-full max-w-5xl flex flex-col space-y-6">
+        <div className="w-full max-w-4xl relative border-l-2 border-slate-800 ml-4 pl-6 md:pl-8 space-y-10">
           {experiences.map((exp, idx) => (
             <motion.div
               key={idx}
               variants={itemVariants}
-              whileHover={{ scale: 1.03 }}
-              className={`p-6 sm:p-8 rounded-2xl shadow-lg transition-transform duration-300 ${
-                theme === "dark"
-                  ? "bg-gray-800 text-gray-200"
-                  : "bg-white text-gray-700"
-              }`}
+              className="relative"
             >
-              <div className="flex items-center mb-3">
-                <FiBriefcase
-                  className={`text-2xl mr-3 transition-colors duration-300 ${
-                    theme === "dark" ? "text-yellow-400" : "text-yellow-500"
-                  }`}
-                />
-                <h4 className="text-lg sm:text-xl font-semibold">
-                  {exp.position}
-                </h4>
+              {/* Timeline Indicator Node */}
+              <span className="absolute -left-[35px] md:-left-[43px] top-1.5 flex h-4.5 w-4.5 rounded-full border-4 border-slate-950 bg-emerald-500 ring-4 ring-emerald-500/20"></span>
+              
+              <div className="space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
+                  <h4 className="text-base sm:text-lg font-bold text-white uppercase tracking-wider">
+                    {exp.position}
+                  </h4>
+                  <span className="text-xs sm:text-sm font-mono text-emerald-400 sm:text-right">
+                    {exp.dates}
+                  </span>
+                </div>
+                
+                <p className="text-xs sm:text-sm font-semibold text-gray-300">
+                  {exp.company} &bull; <span className="text-xs text-gray-500 italic">{exp.location || "United States"}</span>
+                </p>
+
+                {exp.responsibilities && (
+                  <ul className="list-disc list-inside space-y-1.5 text-xs sm:text-sm text-gray-400">
+                    {exp.responsibilities.map((res, i) => (
+                      <li key={i} className="leading-relaxed">
+                        {res}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-              <p className="text-sm sm:text-base mb-1">{exp.company}</p>
-              <span className="text-xs sm:text-sm italic text-gray-400 mb-3">
-                {exp.dates}
-              </span>
-              {exp.responsibilities && (
-                <ul className="list-disc list-inside space-y-1 text-sm sm:text-base">
-                  {exp.responsibilities.map((res, i) => (
-                    <li key={i}>{res}</li>
-                  ))}
-                </ul>
-              )}
             </motion.div>
           ))}
         </div>

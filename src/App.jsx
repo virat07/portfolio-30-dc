@@ -7,6 +7,7 @@ import WorkExperience from "./components/ExperienceComponent";
 import SkillsComponent from "./components/SkillsComponent";
 import MediumNotionComponent from "./components/MediumNotionComponent";
 import ChatButton from "./components/ChatComponent";
+import AgentConsole from "./components/AgentConsole";
 
 export default function App() {
   const profilePicUrl = "/027A1497.jpeg";
@@ -69,16 +70,30 @@ export default function App() {
             }}
           />
         </div>
-        <div ref={aboutUsRef}>
-          <AboutUs profilePicUrl={profilePicUrl} theme={theme} />
+
+        {/* Two-Column Split Console Grid Layout */}
+        <div className="lg:grid lg:grid-cols-12 lg:gap-10 mt-10 items-start">
+          {/* Left Column: CV Track */}
+          <div className="lg:col-span-7 flex flex-col space-y-16">
+            <div ref={aboutUsRef}>
+              <AboutUs profilePicUrl={profilePicUrl} theme={theme} />
+            </div>
+            <div ref={experienceRef}>
+              <WorkExperience theme={theme} />
+            </div>
+            <div ref={skillsRef}>
+              <SkillsComponent theme={theme} />
+            </div>
+          </div>
+
+          {/* Right Column: AI Console Simulator */}
+          <div className="lg:col-span-5 lg:sticky lg:top-24 mt-12 lg:mt-0">
+            <AgentConsole theme={theme} />
+          </div>
         </div>
-        <div ref={experienceRef}>
-          <WorkExperience theme={theme} />
-        </div>
-        <div ref={skillsRef}>
-          <SkillsComponent theme={theme} />
-        </div>
-        <div ref={mediumNotionRef}>
+
+        {/* Publications / Blog Section */}
+        <div ref={mediumNotionRef} className="mt-20">
           <MediumNotionComponent theme={theme} />
         </div>
       </div>

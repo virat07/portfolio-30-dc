@@ -64,6 +64,31 @@ const AboutCard = ({ profilePicUrl, theme = "light" }) => {
             optimizing full-stack performance, I bring a problem-solving mindset and a drive
             for innovation.
           </p>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-3 gap-4 pt-6">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="p-4 rounded-xl glass-panel glow-border-emerald flex flex-col items-center justify-center text-center"
+            >
+              <span className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">6+</span>
+              <span className="text-[10px] sm:text-xs text-emerald-400 font-mono mt-1 uppercase">Yrs Exp</span>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="p-4 rounded-xl glass-panel glow-border-emerald flex flex-col items-center justify-center text-center"
+            >
+              <span className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">25+</span>
+              <span className="text-[10px] sm:text-xs text-emerald-400 font-mono mt-1 uppercase">Projects</span>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="p-4 rounded-xl glass-panel glow-border-emerald flex flex-col items-center justify-center text-center"
+            >
+              <span className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">1,500+</span>
+              <span className="text-[10px] sm:text-xs text-emerald-400 font-mono mt-1 uppercase">Commits</span>
+            </motion.div>
+          </div>
         </div>
       </motion.div>
     </div>
