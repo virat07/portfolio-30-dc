@@ -44,28 +44,25 @@ const AboutCard = ({ profilePicUrl, theme = "light" }) => {
             background
           </h3>
           <p className="text-base sm:text-lg leading-relaxed">
-            I’m Bharat Gupta, a frontend-focused software engineer with 8 years
-            of experience building impactful products for startups, mid-scale
-            companies, and enterprise teams. My expertise spans modern
-            technologies such as React.js, Next.js, Tailwind, and Python, backed
-            by a strong foundation in computer science from my Master’s at
-            California State University, San Bernardino.
+            I’m Bharat Gupta, a frontend-focused software engineer with 6+ years
+            of experience crafting high-performance React applications and full-stack
+            systems. My expertise spans modern technologies such as React.js, Next.js,
+            Tailwind, and Python, backed by a strong foundation in computer science from
+            my Master’s at California State University, San Bernardino.
           </p>
           <p className="text-base sm:text-lg leading-relaxed">
-            Throughout my career, I’ve led high-impact projects—from improving
-            user engagement by 30% through innovative UI features to enhancing
-            forecasting accuracy with predictive analytics models. I thrive in
-            collaborative, fast-paced environments, working closely with
-            designers, product managers, and engineers to deliver seamless,
-            scalable, and secure solutions.
+            Throughout my career, I’ve led high-impact projects—from building agentic
+            development workflows using Figma MCP and Claude that slash component build times,
+            to scaling marketplace platforms and optimizing Core Web Vitals to achieve
+            dramatic performance gains. I thrive in collaborative, fast-paced environments,
+            bridging design and engineering to deliver seamless, scalable, and secure solutions.
           </p>
           <p className="text-base sm:text-lg leading-relaxed">
-            Passionate about continuous learning, I actively explore emerging
-            tools and technologies, from AI-powered development assistants to
-            cloud computing solutions. Whether it’s crafting intuitive user
-            experiences, optimizing performance, or mentoring teams, I bring a
-            problem-solving mindset and a drive for innovation to every project
-            I take on.
+            Passionate about systems thinking and modern AI tooling (such as Cursor, Claude,
+            and Kiro), I build fast and smart without cutting corners. Whether it’s crafting
+            reusable component libraries, automating CI/CD pipelines with review agents, or
+            optimizing full-stack performance, I bring a problem-solving mindset and a drive
+            for innovation.
           </p>
         </div>
       </motion.div>
