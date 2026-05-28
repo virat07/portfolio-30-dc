@@ -13,8 +13,18 @@ import DriverStandings from "./components/DriverStandings";
 
 export default function App() {
   const profilePicUrl = "/027A1497.jpeg";
-  const theme = "dark"; // Enforce dark theme globally for the premium command console look
+  const [theme, setTheme] = useState("dark");
   const [f1Complete, setF1Complete] = useState(false);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    if (nextTheme === "light") {
+      document.body.classList.add("light");
+    } else {
+      document.body.classList.remove("light");
+    }
+  };
 
   const typingHomeRef = useRef(null);
   const aboutUsRef = useRef(null);
@@ -37,7 +47,7 @@ export default function App() {
   };
 
   return (
-    <div className="bg-gray-950 text-white min-h-screen">
+    <div className={`min-h-screen transition-colors duration-300 ${theme === "dark" ? "bg-gray-950 text-white" : "bg-slate-50 text-slate-900"}`}>
       <NavBarComponent
         scrollToSection={scrollToSection}
         refs={{
@@ -49,6 +59,7 @@ export default function App() {
           mediumNotionRef,
         }}
         theme={theme}
+        toggleTheme={toggleTheme}
       />
 
       {/* Main Content Dashboard */}

@@ -62,7 +62,9 @@ function WorkExperience({ theme }) {
       variants={containerVariants}
       className="w-full flex flex-col items-start"
     >
-      <h3 className="uppercase tracking-[8px] text-sm text-gray-400 font-bold mb-8">
+      <h3 className={`uppercase tracking-[8px] text-sm font-bold mb-8 transition-colors duration-300 ${
+        theme === "dark" ? "text-gray-400" : "text-slate-500"
+      }`}>
         Work Experience
       </h3>
 
@@ -71,7 +73,9 @@ function WorkExperience({ theme }) {
           Loading experiences...
         </p>
       ) : (
-        <div className="w-full max-w-4xl relative border-l-2 border-slate-800 ml-4 pl-6 md:pl-8 space-y-10">
+        <div className={`w-full max-w-4xl relative ml-4 pl-6 md:pl-8 space-y-10 border-l-2 transition-colors duration-300 ${
+          theme === "dark" ? "border-slate-800" : "border-slate-200"
+        }`}>
           {experiences.map((exp, idx) => (
             <motion.div
               key={idx}
@@ -79,24 +83,32 @@ function WorkExperience({ theme }) {
               className="relative"
             >
               {/* Timeline Indicator Node */}
-              <span className="absolute -left-[35px] md:-left-[43px] top-1.5 flex h-4.5 w-4.5 rounded-full border-4 border-slate-950 bg-emerald-500 ring-4 ring-emerald-500/20"></span>
+              <span className={`absolute -left-[35px] md:-left-[43px] top-1.5 flex h-4.5 w-4.5 rounded-full border-4 bg-emerald-500 ring-4 ring-emerald-500/20 transition-colors duration-300 ${
+                theme === "dark" ? "border-slate-950" : "border-slate-50"
+              }`}></span>
               
               <div className="space-y-2">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
-                  <h4 className="text-base sm:text-lg font-bold text-white uppercase tracking-wider">
+                  <h4 className={`text-base sm:text-lg font-bold uppercase tracking-wider transition-colors duration-300 ${
+                    theme === "dark" ? "text-white" : "text-slate-900"
+                  }`}>
                     {exp.position}
                   </h4>
-                  <span className="text-xs sm:text-sm font-mono text-emerald-400 sm:text-right">
+                  <span className="text-xs sm:text-sm font-mono text-emerald-500 sm:text-right font-semibold">
                     {exp.dates}
                   </span>
                 </div>
                 
-                <p className="text-xs sm:text-sm font-semibold text-gray-300">
+                <p className={`text-xs sm:text-sm font-semibold transition-colors duration-300 ${
+                  theme === "dark" ? "text-gray-300" : "text-slate-700"
+                }`}>
                   {exp.company} &bull; <span className="text-xs text-gray-500 italic">{exp.location || "United States"}</span>
                 </p>
 
                 {exp.responsibilities && (
-                  <ul className="list-disc list-inside space-y-1.5 text-xs sm:text-sm text-gray-400">
+                  <ul className={`list-disc list-inside space-y-1.5 text-xs sm:text-sm transition-colors duration-300 ${
+                    theme === "dark" ? "text-gray-400" : "text-slate-600"
+                  }`}>
                     {exp.responsibilities.map((res, i) => (
                       <li key={i} className="leading-relaxed">
                         {res}

@@ -20,7 +20,9 @@ const AboutCard = ({ profilePicUrl, theme = "light" }) => {
       {/* Mockup Header: BHARAT GUPTA - SOFTWARE ENGINEER */}
       <div className="w-full flex justify-between items-start mb-6">
         <div className="flex flex-col">
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-wide text-white uppercase">
+          <h1 className={`text-4xl sm:text-5xl font-extrabold tracking-wide uppercase transition-colors duration-300 ${
+            theme === "dark" ? "text-white" : "text-slate-900"
+          }`}>
             Bharat Gupta
           </h1>
           <h2 className="text-xs sm:text-sm font-bold tracking-[6px] text-emerald-400 uppercase mt-2 h-5 flex items-center">
@@ -30,12 +32,16 @@ const AboutCard = ({ profilePicUrl, theme = "light" }) => {
         </div>
         
         {/* Social Icons */}
-        <div className="flex space-x-3 text-gray-400 text-xl pt-2">
+        <div className={`flex space-x-3 text-xl pt-2 transition-colors duration-300 ${
+          theme === "dark" ? "text-gray-400" : "text-slate-500"
+        }`}>
           <a
             href="https://github.com/virat07"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-white transition duration-200"
+            className={`transition duration-200 ${
+              theme === "dark" ? "hover:text-white" : "hover:text-slate-900"
+            }`}
           >
             <FaGithub />
           </a>
@@ -43,7 +49,9 @@ const AboutCard = ({ profilePicUrl, theme = "light" }) => {
             href="https://linkedin.com/in/bharat-gupta-07"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-white transition duration-200"
+            className={`transition duration-200 ${
+              theme === "dark" ? "hover:text-white" : "hover:text-slate-900"
+            }`}
           >
             <FaLinkedin />
           </a>
@@ -61,14 +69,18 @@ const AboutCard = ({ profilePicUrl, theme = "light" }) => {
         <motion.img
           src={profilePicUrl}
           alt="Bharat Gupta"
-          className="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl object-cover border border-slate-700/50 flex-shrink-0"
+          className={`w-32 h-32 sm:w-40 sm:h-40 rounded-2xl object-cover flex-shrink-0 transition-colors duration-300 border ${
+            theme === "dark" ? "border-slate-700/50" : "border-slate-200"
+          }`}
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8 }}
         />
 
         {/* Text Details & Stats */}
-        <div className="flex-1 space-y-4 text-xs sm:text-sm leading-relaxed text-gray-300">
+        <div className={`flex-1 space-y-4 text-xs sm:text-sm leading-relaxed transition-colors duration-300 ${
+          theme === "dark" ? "text-gray-300" : "text-slate-600"
+        }`}>
           <p>
             I’m Bharat Gupta, a frontend-focused software engineer with 6+ years
             of experience crafting high-performance React applications and full-stack
@@ -83,27 +95,47 @@ const AboutCard = ({ profilePicUrl, theme = "light" }) => {
           </p>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-3 gap-3 sm:gap-4 pt-4 border-t border-slate-800">
+          <div className={`grid grid-cols-3 gap-3 sm:gap-4 pt-4 border-t transition-colors duration-300 ${
+            theme === "dark" ? "border-slate-800" : "border-slate-200"
+          }`}>
             <motion.div
               whileHover={{ scale: 1.05 }}
-              className="py-3 px-2 rounded-xl bg-slate-950/50 border border-slate-800/80 flex flex-col items-center justify-center text-center"
+              className={`py-3 px-2 rounded-xl flex flex-col items-center justify-center text-center transition-colors duration-300 ${
+                theme === "dark"
+                  ? "bg-slate-950/50 border border-slate-800/80"
+                  : "bg-slate-50 border border-slate-200/80"
+              }`}
             >
-              <span className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">6+</span>
-              <span className="text-[9px] sm:text-[10px] text-emerald-400 font-mono mt-0.5 uppercase tracking-wider">Yrs Exp</span>
+              <span className={`text-xl sm:text-2xl font-extrabold tracking-tight transition-colors duration-300 ${
+                theme === "dark" ? "text-white" : "text-slate-950"
+              }`}>6+</span>
+              <span className="text-[9px] sm:text-[10px] text-emerald-500 font-mono mt-0.5 uppercase tracking-wider">Yrs Exp</span>
             </motion.div>
             <motion.div
               whileHover={{ scale: 1.05 }}
-              className="py-3 px-2 rounded-xl bg-slate-950/50 border border-slate-800/80 flex flex-col items-center justify-center text-center"
+              className={`py-3 px-2 rounded-xl flex flex-col items-center justify-center text-center transition-colors duration-300 ${
+                theme === "dark"
+                  ? "bg-slate-950/50 border border-slate-800/80"
+                  : "bg-slate-50 border border-slate-200/80"
+              }`}
             >
-              <span className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">25+</span>
-              <span className="text-[9px] sm:text-[10px] text-emerald-400 font-mono mt-0.5 uppercase tracking-wider">Projects</span>
+              <span className={`text-xl sm:text-2xl font-extrabold tracking-tight transition-colors duration-300 ${
+                theme === "dark" ? "text-white" : "text-slate-950"
+              }`}>25+</span>
+              <span className="text-[9px] sm:text-[10px] text-emerald-500 font-mono mt-0.5 uppercase tracking-wider">Projects</span>
             </motion.div>
             <motion.div
               whileHover={{ scale: 1.05 }}
-              className="py-3 px-2 rounded-xl bg-slate-950/50 border border-slate-800/80 flex flex-col items-center justify-center text-center"
+              className={`py-3 px-2 rounded-xl flex flex-col items-center justify-center text-center transition-colors duration-300 ${
+                theme === "dark"
+                  ? "bg-slate-950/50 border border-slate-800/80"
+                  : "bg-slate-50 border border-slate-200/80"
+              }`}
             >
-              <span className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">1,500+</span>
-              <span className="text-[9px] sm:text-[10px] text-emerald-400 font-mono mt-0.5 uppercase tracking-wider">Commits</span>
+              <span className={`text-xl sm:text-2xl font-extrabold tracking-tight transition-colors duration-300 ${
+                theme === "dark" ? "text-white" : "text-slate-950"
+              }`}>1,500+</span>
+              <span className="text-[9px] sm:text-[10px] text-emerald-500 font-mono mt-0.5 uppercase tracking-wider">Commits</span>
             </motion.div>
           </div>
         </div>

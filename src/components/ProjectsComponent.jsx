@@ -28,7 +28,7 @@ const projectsData = [
   }
 ];
 
-const ProjectsComponent = () => {
+const ProjectsComponent = ({ theme = "dark" }) => {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
@@ -42,7 +42,9 @@ const ProjectsComponent = () => {
       variants={containerVariants}
       className="w-full flex flex-col items-start"
     >
-      <h3 className="uppercase tracking-[8px] text-sm text-gray-400 font-bold mb-8">
+      <h3 className={`uppercase tracking-[8px] text-sm font-bold mb-8 transition-colors duration-300 ${
+        theme === "dark" ? "text-gray-400" : "text-slate-500"
+      }`}>
         Featured Projects
       </h3>
 
@@ -55,14 +57,18 @@ const ProjectsComponent = () => {
           >
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0">
-              <h4 className="text-base sm:text-lg font-bold text-white tracking-wide">
+              <h4 className={`text-base sm:text-lg font-bold tracking-wide transition-colors duration-300 ${
+                theme === "dark" ? "text-white" : "text-slate-900"
+              }`}>
                 {project.title}
               </h4>
-              <span className="text-xs font-mono text-emerald-400">{project.date}</span>
+              <span className="text-xs font-mono text-emerald-500 font-semibold">{project.date}</span>
             </div>
 
             {/* Description */}
-            <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">
+            <p className={`text-xs sm:text-sm leading-relaxed transition-colors duration-300 ${
+              theme === "dark" ? "text-gray-400" : "text-slate-600"
+            }`}>
               {project.description}
             </p>
 
@@ -71,7 +77,11 @@ const ProjectsComponent = () => {
               {project.tech.map((t, i) => (
                 <span
                   key={i}
-                  className="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-900/60 text-emerald-400 border border-emerald-500/20"
+                  className={`px-2 py-0.5 rounded text-[10px] font-mono border transition-colors duration-300 ${
+                    theme === "dark"
+                      ? "bg-slate-900/60 text-emerald-400 border-emerald-500/20"
+                      : "bg-slate-100 text-emerald-700 border-emerald-500/30"
+                  }`}
                 >
                   {t}
                 </span>
@@ -79,12 +89,16 @@ const ProjectsComponent = () => {
             </div>
 
             {/* Actions Links */}
-            <div className="flex space-x-4 pt-2 text-xs border-t border-slate-900/40">
+            <div className={`flex space-x-4 pt-2 text-xs border-t transition-colors duration-300 ${
+              theme === "dark" ? "border-slate-900/40" : "border-slate-200"
+            }`}>
               <a
                 href={project.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center space-x-1.5 text-gray-400 hover:text-white transition duration-200"
+                className={`flex items-center space-x-1.5 transition duration-200 ${
+                  theme === "dark" ? "text-gray-400 hover:text-white" : "text-slate-500 hover:text-slate-900"
+                }`}
               >
                 <FiGithub />
                 <span>Source Code</span>
@@ -94,7 +108,9 @@ const ProjectsComponent = () => {
                   href={project.live}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center space-x-1.5 text-emerald-400 hover:text-emerald-300 transition duration-200 font-semibold"
+                  className={`flex items-center space-x-1.5 transition duration-200 font-semibold ${
+                    theme === "dark" ? "text-emerald-400 hover:text-emerald-300" : "text-emerald-600 hover:text-emerald-700"
+                  }`}
                 >
                   <FiExternalLink />
                   <span>Live Demo</span>

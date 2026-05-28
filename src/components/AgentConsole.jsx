@@ -112,28 +112,40 @@ const AgentConsole = ({ theme = "light", onF1Complete }) => {
   };
 
   return (
-    <div className={`rounded-2xl shadow-xl overflow-hidden glass-panel border border-gray-800 transition-colors duration-300 ${
-      theme === "dark" ? "text-gray-200" : "text-gray-700 bg-slate-900/90"
+    <div className={`rounded-2xl shadow-xl overflow-hidden glass-panel border transition-all duration-300 ${
+      theme === "dark" ? "border-gray-800 text-gray-200" : "border-slate-200 text-slate-850"
     }`}>
       {/* Console Header */}
-      <div className="bg-slate-950 px-4 py-3 flex items-center justify-between border-b border-gray-800">
+      <div className={`px-4 py-3 flex items-center justify-between border-b transition-colors duration-300 ${
+        theme === "dark" ? "bg-slate-950 border-gray-800" : "bg-slate-100 border-slate-200"
+      }`}>
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 rounded-full bg-red-500"></div>
           <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
           <div className="w-3 h-3 rounded-full bg-green-500"></div>
-          <span className="text-xs font-mono text-gray-400 pl-2">Bharat-AI-Console</span>
+          <span className={`text-xs font-mono pl-2 transition-colors duration-300 ${
+            theme === "dark" ? "text-gray-400" : "text-slate-500"
+          }`}>Bharat-AI-Console</span>
         </div>
         <div className="flex items-center space-x-2">
           <span className="flex h-2 w-2 relative">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+              theme === "dark" ? "bg-emerald-400" : "bg-emerald-500"
+            }`}></span>
+            <span className={`relative inline-flex rounded-full h-2 w-2 ${
+              theme === "dark" ? "bg-emerald-500" : "bg-emerald-600"
+            }`}></span>
           </span>
-          <span className="text-xs font-mono text-emerald-400">Agent Active</span>
+          <span className={`text-xs font-mono transition-colors duration-300 ${
+            theme === "dark" ? "text-emerald-400" : "text-emerald-600"
+          }`}>Agent Active</span>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="bg-slate-900 flex border-b border-gray-800">
+      <div className={`flex border-b transition-colors duration-300 ${
+        theme === "dark" ? "bg-slate-900 border-gray-800" : "bg-slate-50 border-slate-200"
+      }`}>
         {[
           { id: "Digital Twin", icon: <FiMessageSquare /> },
           { id: "F1 Predictor", icon: <FiPlay /> },
@@ -142,10 +154,16 @@ const AgentConsole = ({ theme = "light", onF1Complete }) => {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center space-x-2 px-4 py-3 font-mono text-sm border-r border-gray-800 transition-colors duration-200 ${
+            className={`flex items-center space-x-2 px-4 py-3 font-mono text-sm border-r transition-colors duration-200 ${
+              theme === "dark" ? "border-gray-800" : "border-slate-200"
+            } ${
               activeTab === tab.id
-                ? "bg-slate-950 text-emerald-400 border-t-2 border-t-emerald-500"
-                : "text-gray-400 hover:bg-slate-800 hover:text-white"
+                ? theme === "dark"
+                  ? "bg-slate-950 text-emerald-400 border-t-2 border-t-emerald-500"
+                  : "bg-[#fdfbf7] text-emerald-600 border-t-2 border-t-emerald-500 font-semibold"
+                : theme === "dark"
+                  ? "text-gray-400 hover:bg-slate-800 hover:text-white"
+                  : "text-slate-500 hover:bg-slate-100 hover:text-slate-855"
             }`}
           >
             {tab.icon}
@@ -155,7 +173,9 @@ const AgentConsole = ({ theme = "light", onF1Complete }) => {
       </div>
 
       {/* Console Body */}
-      <div className="p-5 bg-slate-950 h-[380px] flex flex-col font-mono">
+      <div className={`p-5 h-[380px] flex flex-col font-mono transition-colors duration-300 ${
+        theme === "dark" ? "bg-slate-950" : "bg-[#fdfbf7]"
+      }`}>
         <AnimatePresence mode="wait">
           {activeTab === "Digital Twin" && (
             <motion.div
@@ -172,10 +192,14 @@ const AgentConsole = ({ theme = "light", onF1Complete }) => {
                     key={i}
                     className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
                   >
-                    <div className={`max-w-[85%] rounded-xl px-3 py-2 text-sm leading-relaxed ${
+                    <div className={`max-w-[85%] rounded-xl px-3 py-2 text-sm leading-relaxed border transition-colors duration-300 ${
                       msg.sender === "user"
-                        ? "bg-emerald-600/20 text-emerald-300 border border-emerald-500/30"
-                        : "bg-slate-800 text-gray-200 border border-slate-700/50"
+                        ? theme === "dark"
+                          ? "bg-emerald-600/20 text-emerald-300 border-emerald-500/30"
+                          : "bg-emerald-50/70 text-emerald-800 border-emerald-500/30"
+                        : theme === "dark"
+                          ? "bg-slate-800 text-gray-200 border-slate-700/50"
+                          : "bg-slate-100 text-slate-700 border-slate-200"
                     }`}>
                       {msg.text}
                     </div>
@@ -183,7 +207,11 @@ const AgentConsole = ({ theme = "light", onF1Complete }) => {
                 ))}
                 {isTyping && (
                   <div className="flex justify-start">
-                    <div className="bg-slate-800 text-gray-400 rounded-xl px-3 py-2 text-sm border border-slate-700/50 flex space-x-1 items-center">
+                    <div className={`rounded-xl px-3 py-2 text-sm flex space-x-1 items-center border transition-colors duration-300 ${
+                      theme === "dark"
+                        ? "bg-slate-800 text-gray-400 border-slate-700/50"
+                        : "bg-slate-100 text-slate-500 border-slate-200"
+                    }`}>
                       <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></span>
                       <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce delay-100"></span>
                       <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce delay-200"></span>
@@ -193,22 +221,36 @@ const AgentConsole = ({ theme = "light", onF1Complete }) => {
               </div>
 
               {/* Quick Prompts */}
-              <div className="py-3 flex flex-wrap gap-2 border-t border-gray-800 mt-2">
+              <div className={`py-3 flex flex-wrap gap-2 border-t mt-2 transition-colors duration-300 ${
+                theme === "dark" ? "border-gray-800" : "border-slate-200"
+              }`}>
                 <button
                   onClick={() => handleSendMessage("hire")}
-                  className="bg-slate-900 hover:bg-slate-800 text-xs text-emerald-400 border border-gray-800 px-2 py-1.5 rounded-md transition duration-200"
+                  className={`text-xs border px-2 py-1.5 rounded-md transition duration-200 ${
+                    theme === "dark"
+                      ? "bg-slate-900 hover:bg-slate-800 text-emerald-400 border-gray-800"
+                      : "bg-white hover:bg-slate-50 text-emerald-600 border-slate-200"
+                  }`}
                 >
                   &gt; Why hire Bharat?
                 </button>
                 <button
                   onClick={() => handleSendMessage("rocket")}
-                  className="bg-slate-900 hover:bg-slate-800 text-xs text-emerald-400 border border-gray-800 px-2 py-1.5 rounded-md transition duration-200"
+                  className={`text-xs border px-2 py-1.5 rounded-md transition duration-200 ${
+                    theme === "dark"
+                      ? "bg-slate-900 hover:bg-slate-800 text-emerald-400 border-gray-800"
+                      : "bg-white hover:bg-slate-50 text-emerald-600 border-slate-200"
+                  }`}
                 >
                   &gt; Rocket experience?
                 </button>
                 <button
                   onClick={() => handleSendMessage("projects")}
-                  className="bg-slate-900 hover:bg-slate-800 text-xs text-emerald-400 border border-gray-800 px-2 py-1.5 rounded-md transition duration-200"
+                  className={`text-xs border px-2 py-1.5 rounded-md transition duration-200 ${
+                    theme === "dark"
+                      ? "bg-slate-900 hover:bg-slate-800 text-emerald-400 border-gray-800"
+                      : "bg-white hover:bg-slate-50 text-emerald-600 border-slate-200"
+                  }`}
                 >
                   &gt; Project details?
                 </button>
@@ -220,7 +262,9 @@ const AgentConsole = ({ theme = "light", onF1Complete }) => {
                   e.preventDefault();
                   handleSendMessage();
                 }}
-                className="flex items-center space-x-2 border-t border-gray-800 pt-2"
+                className={`flex items-center space-x-2 border-t pt-2 transition-colors duration-300 ${
+                  theme === "dark" ? "border-gray-800" : "border-slate-200"
+                }`}
               >
                 <span className="text-emerald-500 font-bold">&gt;</span>
                 <input
@@ -228,7 +272,9 @@ const AgentConsole = ({ theme = "light", onF1Complete }) => {
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   placeholder="Ask a question..."
-                  className="flex-1 bg-transparent border-none text-sm text-white focus:outline-none focus:ring-0 placeholder-gray-600"
+                  className={`flex-1 bg-transparent border-none text-sm focus:outline-none focus:ring-0 transition-colors duration-300 ${
+                    theme === "dark" ? "text-white placeholder-gray-600" : "text-slate-800 placeholder-slate-400"
+                  }`}
                 />
               </form>
             </motion.div>
@@ -245,8 +291,10 @@ const AgentConsole = ({ theme = "light", onF1Complete }) => {
               {/* Simulator Run Button */}
               {!f1Simulating && !showF1Results && (
                 <div className="flex-1 flex flex-col items-center justify-center space-y-4">
-                  <FiCpu className="text-4xl text-emerald-400 animate-pulse" />
-                  <p className="text-sm text-gray-400 text-center px-6">
+                  <FiCpu className="text-4xl text-emerald-500 animate-pulse" />
+                  <p className={`text-sm text-center px-6 transition-colors duration-300 ${
+                    theme === "dark" ? "text-gray-400" : "text-slate-650"
+                  }`}>
                     Run the Gradient Boosting Prediction pipeline to analyze driver telemetry.
                   </p>
                   <button
@@ -264,13 +312,17 @@ const AgentConsole = ({ theme = "light", onF1Complete }) => {
                 <div className="flex-1 flex flex-col h-full overflow-hidden">
                   <div
                     ref={logTerminalRef}
-                    className="flex-1 bg-slate-950 border border-gray-800 rounded-lg p-3 text-xs overflow-y-auto space-y-1.5 custom-scrollbar text-emerald-400/90"
+                    className={`flex-1 border rounded-lg p-3 text-xs overflow-y-auto space-y-1.5 custom-scrollbar transition-colors duration-300 ${
+                      theme === "dark"
+                        ? "bg-slate-950 border-gray-800 text-emerald-450/90"
+                        : "bg-slate-100 border-slate-200 text-emerald-800/90"
+                    }`}
                   >
                     {f1Logs.map((log, i) => (
                       <div key={i}>{log}</div>
                     ))}
                     {f1Simulating && (
-                      <div className="animate-pulse text-emerald-500">
+                      <div className="animate-pulse text-emerald-600 font-bold">
                         [F1-Agent] Computing predictions...
                       </div>
                     )}
@@ -280,25 +332,33 @@ const AgentConsole = ({ theme = "light", onF1Complete }) => {
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="mt-3 bg-slate-900 border border-gray-800 rounded-lg p-3 text-xs"
+                      className={`mt-3 border rounded-lg p-3 text-xs transition-colors duration-300 ${
+                        theme === "dark" ? "bg-slate-900 border-gray-800" : "bg-white border-slate-200"
+                      }`}
                     >
-                      <h4 className="text-white font-bold mb-2">Simulated Race Forecast (Next Race)</h4>
+                      <h4 className={`font-bold mb-2 transition-colors duration-300 ${
+                        theme === "dark" ? "text-white" : "text-slate-900"
+                      }`}>Simulated Race Forecast (Next Race)</h4>
                       <div className="space-y-2">
                         <div>
                           <div className="flex justify-between mb-1">
-                            <span>1. M. Verstappen (RBR)</span>
-                            <span className="font-bold text-emerald-400">72% probability</span>
+                            <span className={theme === "dark" ? "text-gray-250" : "text-slate-700"}>1. M. Verstappen (RBR)</span>
+                            <span className="font-bold text-emerald-500">72% probability</span>
                           </div>
-                          <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                          <div className={`w-full h-2 rounded-full overflow-hidden transition-colors duration-300 ${
+                            theme === "dark" ? "bg-slate-800" : "bg-slate-200"
+                          }`}>
                             <div className="bg-emerald-500 h-full rounded-full" style={{ width: "72%" }}></div>
                           </div>
                         </div>
                         <div>
                           <div className="flex justify-between mb-1">
-                            <span>2. L. Norris (McLaren)</span>
-                            <span className="font-bold text-teal-400">68% probability</span>
+                            <span className={theme === "dark" ? "text-gray-255" : "text-slate-700"}>2. L. Norris (McLaren)</span>
+                            <span className="font-bold text-teal-600">68% probability</span>
                           </div>
-                          <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                          <div className={`w-full h-2 rounded-full overflow-hidden transition-colors duration-300 ${
+                            theme === "dark" ? "bg-slate-800" : "bg-slate-200"
+                          }`}>
                             <div className="bg-teal-500 h-full rounded-full" style={{ width: "68%" }}></div>
                           </div>
                         </div>
@@ -309,7 +369,9 @@ const AgentConsole = ({ theme = "light", onF1Complete }) => {
                           setF1Logs([]);
                           if (onF1Complete) onF1Complete(false);
                         }}
-                        className="mt-3 text-xs text-gray-500 hover:text-white underline"
+                        className={`mt-3 text-xs underline transition-colors duration-300 ${
+                          theme === "dark" ? "text-gray-500 hover:text-white" : "text-slate-400 hover:text-slate-800"
+                        }`}
                       >
                         Reset Simulator
                       </button>
@@ -329,12 +391,20 @@ const AgentConsole = ({ theme = "light", onF1Complete }) => {
               className="flex-1 flex flex-col h-full overflow-hidden"
             >
               <div className="flex justify-between items-center mb-3">
-                <span className="text-white text-xs font-bold">STOCK-BOT MOVEMENT MONITOR</span>
-                <span className="text-[10px] text-gray-500">Live Scraped CSV Logs</span>
+                <span className={`text-xs font-bold transition-colors duration-300 ${
+                  theme === "dark" ? "text-white" : "text-slate-900"
+                }`}>STOCK-BOT MOVEMENT MONITOR</span>
+                <span className={`text-[10px] transition-colors duration-300 ${
+                  theme === "dark" ? "text-gray-500" : "text-slate-400"
+                }`}>Live Scraped CSV Logs</span>
               </div>
               <div className="flex-1 overflow-x-auto custom-scrollbar">
-                <table className="w-full text-left text-xs text-gray-400">
-                  <thead className="bg-slate-900 text-white uppercase text-[10px] border-b border-gray-800">
+                <table className={`w-full text-left text-xs transition-colors duration-300 ${
+                  theme === "dark" ? "text-gray-400" : "text-slate-650"
+                }`}>
+                  <thead className={`uppercase text-[10px] border-b transition-colors duration-300 ${
+                    theme === "dark" ? "bg-slate-900 text-white border-gray-800" : "bg-slate-100 text-slate-950 border-slate-200"
+                  }`}>
                     <tr>
                       <th className="py-2 px-3">Ticker</th>
                       <th className="py-2 px-3">RSI Indicator</th>
@@ -343,25 +413,47 @@ const AgentConsole = ({ theme = "light", onF1Complete }) => {
                       <th className="py-2 px-3">Signal</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-900">
+                  <tbody className={`divide-y transition-colors duration-300 ${
+                    theme === "dark" ? "divide-gray-900" : "divide-slate-200"
+                  }`}>
                     {[
-                      { ticker: "AAPL", rsi: "48 (Oversold)", sentiment: "0.85 (Bullish)", score: "88/100", signal: "STRONG BUY", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30" },
-                      { ticker: "NVDA", rsi: "62 (Neutral)", sentiment: "0.78 (Bullish)", score: "84/100", signal: "BUY", color: "text-teal-400 bg-teal-500/10 border-teal-500/30" },
-                      { ticker: "TSLA", rsi: "71 (Overbought)", sentiment: "0.52 (Neutral)", score: "62/100", signal: "HOLD", color: "text-yellow-400 bg-yellow-500/10 border-yellow-500/30" },
-                      { ticker: "MSFT", rsi: "55 (Neutral)", sentiment: "0.81 (Bullish)", score: "85/100", signal: "BUY", color: "text-teal-400 bg-teal-500/10 border-teal-500/30" },
-                    ].map((row, i) => (
-                      <tr key={i} className="hover:bg-slate-900/50">
-                        <td className="py-2.5 px-3 font-bold text-white">{row.ticker}</td>
-                        <td className="py-2.5 px-3">{row.rsi}</td>
-                        <td className="py-2.5 px-3">{row.sentiment}</td>
-                        <td className="py-2.5 px-3 font-mono text-emerald-400">{row.score}</td>
-                        <td className="py-2.5 px-3">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${row.color}`}>
-                            {row.signal}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
+                      { ticker: "AAPL", rsi: "48 (Oversold)", sentiment: "0.85 (Bullish)", score: "88/100", signal: "STRONG BUY", type: "strong-buy" },
+                      { ticker: "NVDA", rsi: "62 (Neutral)", sentiment: "0.78 (Bullish)", score: "84/100", signal: "BUY", type: "buy" },
+                      { ticker: "TSLA", rsi: "71 (Overbought)", sentiment: "0.52 (Neutral)", score: "62/100", signal: "HOLD", type: "hold" },
+                      { ticker: "MSFT", rsi: "55 (Neutral)", sentiment: "0.81 (Bullish)", score: "85/100", signal: "BUY", type: "buy" },
+                    ].map((row, i) => {
+                      let colorClass = "";
+                      if (row.type === "strong-buy") {
+                        colorClass = theme === "dark" 
+                          ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/30" 
+                          : "text-emerald-700 bg-emerald-50 border-emerald-500/20";
+                      } else if (row.type === "buy") {
+                        colorClass = theme === "dark"
+                          ? "text-teal-400 bg-teal-500/10 border-teal-500/30"
+                          : "text-teal-750 bg-teal-50 border-teal-500/20";
+                      } else {
+                        colorClass = theme === "dark"
+                          ? "text-yellow-400 bg-yellow-500/10 border-yellow-500/30"
+                          : "text-amber-700 bg-amber-50 border-amber-500/20";
+                      }
+                      return (
+                        <tr key={i} className={`transition-colors duration-150 ${
+                          theme === "dark" ? "hover:bg-slate-900/50" : "hover:bg-slate-100/50"
+                        }`}>
+                          <td className={`py-2.5 px-3 font-bold transition-colors duration-300 ${
+                            theme === "dark" ? "text-white" : "text-slate-900"
+                          }`}>{row.ticker}</td>
+                          <td className="py-2.5 px-3">{row.rsi}</td>
+                          <td className="py-2.5 px-3">{row.sentiment}</td>
+                          <td className="py-2.5 px-3 font-mono text-emerald-500 font-semibold">{row.score}</td>
+                          <td className="py-2.5 px-3">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${colorClass}`}>
+                              {row.signal}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

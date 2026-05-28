@@ -52,18 +52,40 @@ const NavBarComponent = ({ scrollToSection, refs, theme, toggleTheme }) => {
                 onClick={() => handleScroll(item.ref)}
                 className={`transition-colors duration-300 font-medium ${
                   theme === "dark"
-                    ? "hover:text-teal-300"
-                    : "hover:text-teal-500"
+                    ? "hover:text-emerald-400 text-gray-300"
+                    : "hover:text-emerald-600 text-slate-700"
                 }`}
               >
                 {item.label}
               </button>
             ))}
             <DownloadResumeComponent />
+            <button
+              onClick={toggleTheme}
+              className={`p-2 rounded-full transition-colors duration-200 ${
+                theme === "dark"
+                  ? "text-yellow-400 hover:bg-gray-800"
+                  : "text-amber-600 hover:bg-slate-100"
+              }`}
+              aria-label="Toggle Theme"
+            >
+              {theme === "dark" ? <FaSun className="h-5 w-5" /> : <FaMoon className="h-5 w-5" />}
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden flex items-center space-x-2">
+            <button
+              onClick={toggleTheme}
+              className={`p-2 rounded-full transition-colors duration-200 ${
+                theme === "dark"
+                  ? "text-yellow-400 hover:bg-gray-800"
+                  : "text-amber-600 hover:bg-slate-100"
+              }`}
+              aria-label="Toggle Theme"
+            >
+              {theme === "dark" ? <FaSun className="h-5 w-5" /> : <FaMoon className="h-5 w-5" />}
+            </button>
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="focus:outline-none text-current"

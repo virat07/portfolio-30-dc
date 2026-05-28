@@ -60,7 +60,9 @@ const SkillsComponent = ({ theme = "light" }) => {
       variants={containerVariants}
       className="w-full flex flex-col items-start"
     >
-      <h3 className="uppercase tracking-[8px] text-sm text-gray-400 font-bold mb-8">
+      <h3 className={`uppercase tracking-[8px] text-sm font-bold mb-8 transition-colors duration-300 ${
+        theme === "dark" ? "text-gray-400" : "text-slate-500"
+      }`}>
         Skills
       </h3>
 
@@ -81,13 +83,19 @@ const SkillsComponent = ({ theme = "light" }) => {
             >
               <div className="flex items-center space-x-2 mb-3">
                 {getIcon(category)}
-                <h4 className="text-sm font-bold text-white uppercase tracking-wider">{category}</h4>
+                <h4 className={`text-sm font-bold uppercase tracking-wider transition-colors duration-300 ${
+                  theme === "dark" ? "text-white" : "text-slate-900"
+                }`}>{category}</h4>
               </div>
               <div className="flex flex-wrap gap-2">
                 {skillsData[category].map((skill, i) => (
                   <span
                     key={i}
-                    className="px-2.5 py-0.5 rounded-full text-xs font-mono bg-slate-900/60 text-emerald-400 border border-emerald-500/20"
+                    className={`px-2.5 py-0.5 rounded-full text-xs font-mono border transition-colors duration-300 ${
+                      theme === "dark"
+                        ? "bg-slate-900/60 text-emerald-400 border-emerald-500/20"
+                        : "bg-slate-100 text-emerald-700 border-emerald-500/30"
+                    }`}
                   >
                     {skill}
                   </span>
