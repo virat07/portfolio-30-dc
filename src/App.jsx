@@ -3,6 +3,7 @@ import NavBarComponent from "./components/NavBar";
 import FooterComponent from "./components/FooterComponent";
 import AboutUs from "./components/AboutUsComponent";
 import WorkExperience from "./components/ExperienceComponent";
+import ProjectsComponent from "./components/ProjectsComponent";
 import SkillsComponent from "./components/SkillsComponent";
 import MediumNotionComponent from "./components/MediumNotionComponent";
 import ChatButton from "./components/ChatComponent";
@@ -16,6 +17,7 @@ export default function App() {
   const typingHomeRef = useRef(null);
   const aboutUsRef = useRef(null);
   const experienceRef = useRef(null);
+  const projectsRef = useRef(null);
   const skillsRef = useRef(null);
   const mediumNotionRef = useRef(null);
 
@@ -40,6 +42,7 @@ export default function App() {
           typingHomeRef,
           aboutUsRef,
           experienceRef,
+          projectsRef,
           skillsRef,
           mediumNotionRef,
         }}
@@ -57,6 +60,9 @@ export default function App() {
             </div>
             <div ref={experienceRef}>
               <WorkExperience theme={theme} />
+            </div>
+            <div ref={projectsRef}>
+              <ProjectsComponent theme={theme} />
             </div>
             <div ref={skillsRef}>
               <SkillsComponent theme={theme} />

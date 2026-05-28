@@ -11,6 +11,7 @@ const NavBarComponent = ({ scrollToSection, refs, theme, toggleTheme }) => {
     { label: "Home", ref: refs.typingHomeRef },
     { label: "About", ref: refs.aboutUsRef },
     { label: "Experience", ref: refs.experienceRef },
+    { label: "Projects", ref: refs.projectsRef },
     { label: "Skills", ref: refs.skillsRef },
     { label: "Blog", ref: refs.mediumNotionRef },
   ];

@@ -20,7 +20,7 @@ const AgentConsole = ({ theme = "light" }) => {
   ]);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const chatEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
 
   // F1 Logs Simulation
   const simulatedLogs = [
@@ -58,7 +58,9 @@ const AgentConsole = ({ theme = "light" }) => {
   }, [f1Logs]);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   }, [messages, isTyping]);
 
   // Digital Twin Responses
@@ -162,7 +164,7 @@ const AgentConsole = ({ theme = "light" }) => {
               className="flex-1 flex flex-col h-full overflow-hidden"
             >
               {/* Chat Messages */}
-              <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+              <div ref={chatContainerRef} className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
                 {messages.map((msg, i) => (
                   <div
                     key={i}
@@ -186,7 +188,6 @@ const AgentConsole = ({ theme = "light" }) => {
                     </div>
                   </div>
                 )}
-                <div ref={chatEndRef} />
               </div>
 
               {/* Quick Prompts */}
