@@ -2,6 +2,7 @@ import React, { useRef, useMemo, useState, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Html, MeshDistortMaterial, PointMaterial } from "@react-three/drei";
 import * as THREE from "three";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Import existing portfolio sections
 import AboutUs from "./AboutUsComponent";
@@ -57,57 +58,116 @@ function Starfield({ count = 450, color = "#10B981" }) {
   );
 }
 
-// Procedural Dotted Globe representing Earth (Holographic Global)
+// Procedural Dotted Globe representing Earth with continental outlines (using 3D noise)
 function DottedGlobe({ theme }) {
   const globeRef = useRef();
+  const oceanRef = useRef();
 
-  const positions = useMemo(() => {
-    const count = 850;
-    const arr = new Float32Array(count * 3);
+  const { landPositions, waterPositions } = useMemo(() => {
+    const count = 2200;
+    const land = [];
+    const water = [];
     const radius = 1.95;
+
+    // Simple 3D noise approximation to simulate landmasses
+    const getNoise = (x, y, z) => {
+      const nx = x * 1.5;
+      const ny = y * 1.5;
+      const nz = z * 1.5;
+      return Math.sin(nx) * Math.cos(ny) + 
+             Math.sin(ny) * Math.cos(nz) + 
+             Math.sin(nz) * Math.cos(nx) +
+             0.5 * Math.sin(nx * 3.0) * Math.cos(ny * 3.0) +
+             0.25 * Math.sin(nx * 6.0) * Math.cos(ny * 6.0);
+    };
+
     for (let i = 0; i < count; i++) {
       const y = 1 - (i / (count - 1)) * 2;
       const rAtY = Math.sqrt(1 - y * y);
       const theta = 1.618033988749 * 2 * Math.PI * i; // golden angle
-      arr[i * 3] = Math.cos(theta) * rAtY * radius;
-      arr[i * 3 + 1] = y * radius;
-      arr[i * 3 + 2] = Math.sin(theta) * rAtY * radius;
+      const px = Math.cos(theta) * rAtY * radius;
+      const py = y * radius;
+      const pz = Math.sin(theta) * rAtY * radius;
+
+      const nVal = getNoise(px, py, pz);
+      if (nVal > -0.1) {
+        land.push(px, py, pz);
+      } else {
+        water.push(px, py, pz);
+      }
     }
-    return arr;
+
+    return {
+      landPositions: new Float32Array(land),
+      waterPositions: new Float32Array(water)
+    };
   }, []);
 
   useFrame((state) => {
+    const t = state.clock.getElapsedTime();
     if (globeRef.current) {
-      globeRef.current.rotation.y = state.clock.getElapsedTime() * 0.04;
+      globeRef.current.rotation.y = t * 0.03;
+    }
+    if (oceanRef.current) {
+      oceanRef.current.rotation.y = t * 0.03;
     }
   });
 
   return (
     <group>
+      {/* Landmass Points (Dense, Bright) */}
       <points ref={globeRef}>
         <bufferGeometry>
-          <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+          <bufferAttribute attach="attributes-position" args={[landPositions, 3]} />
         </bufferGeometry>
         <PointMaterial
           transparent
           color={theme === "dark" ? "#10b981" : "#3b82f6"}
-          size={0.06}
+          size={0.07}
           sizeAttenuation={true}
           depthWrite={false}
-          opacity={0.65}
+          opacity={0.8}
         />
       </points>
-      {/* Subtle morphing liquid core representing Earth's magma/core energy */}
+
+      {/* Ocean Points (Sparse, Dim) */}
+      <points ref={oceanRef}>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[waterPositions, 3]} />
+        </bufferGeometry>
+        <PointMaterial
+          transparent
+          color={theme === "dark" ? "#047857" : "#93c5fd"}
+          size={0.035}
+          sizeAttenuation={true}
+          depthWrite={false}
+          opacity={0.22}
+        />
+      </points>
+
+      {/* Holographic Wireframe Earth Shell to overlay points */}
+      <mesh>
+        <sphereGeometry args={[1.96, 20, 20]} />
+        <meshBasicMaterial
+          color={theme === "dark" ? "#10b981" : "#3b82f6"}
+          wireframe
+          transparent
+          opacity={0.05}
+          depthWrite={false}
+        />
+      </mesh>
+
+      {/* Morphing Liquid Core representing global energy */}
       <mesh>
         <sphereGeometry args={[1.2, 32, 32]} />
         <MeshDistortMaterial
           color={theme === "dark" ? "#06b6d4" : "#6366f1"}
-          distort={0.3}
-          speed={1.5}
+          distort={0.25}
+          speed={1.2}
           roughness={0.2}
           metalness={0.9}
           transparent
-          opacity={0.15}
+          opacity={0.12}
         />
       </mesh>
     </group>
@@ -157,7 +217,7 @@ function ConnectionArcs({ theme }) {
 
   useFrame((state) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y = state.clock.getElapsedTime() * 0.04;
+      groupRef.current.rotation.y = state.clock.getElapsedTime() * 0.03;
     }
   });
 
@@ -175,7 +235,7 @@ function ConnectionArcs({ theme }) {
             }
             linewidth={1.5}
             transparent
-            opacity={0.4}
+            opacity={0.35}
           />
         </line>
       ))}
@@ -210,18 +270,87 @@ function OrbitRing({ radius, theme }) {
   );
 }
 
-// Orbital Glass Card Node (represents portfolio sections orbiting Earth)
-function GlassCardNode({ id, title, active, onClick, position, theme, setActiveTab }) {
-  const meshRef = useRef();
+// Laser line connecting satellite to center of Earth
+function TelemetryLaser({ start = [0, 0, 0], end, theme, active }) {
+  const positions = useMemo(() => {
+    return new Float32Array([...start, ...end]);
+  }, [start, end]);
+
+  return (
+    <line>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+      <lineBasicMaterial
+        color={active 
+          ? (theme === "dark" ? "#10b981" : "#3b82f6") 
+          : (theme === "dark" ? "#064e3b" : "#bfdbfe")
+        }
+        transparent
+        opacity={active ? 0.7 : 0.12}
+        linewidth={active ? 2 : 1}
+      />
+    </line>
+  );
+}
+
+// Traveling data packets along the laser lines
+function DataPulse({ start = [0, 0, 0], end, theme, active }) {
+  const pulseRef = useRef();
+
+  useFrame((state) => {
+    const speed = active ? 0.8 : 0.4;
+    const t = (state.clock.getElapsedTime() * speed) % 1.0;
+    if (pulseRef.current) {
+      pulseRef.current.position.set(
+        start[0] + (end[0] - start[0]) * t,
+        start[1] + (end[1] - start[1]) * t,
+        start[2] + (end[2] - start[2]) * t
+      );
+    }
+  });
+
+  return (
+    <mesh ref={pulseRef}>
+      <sphereGeometry args={[0.045, 8, 8]} />
+      <meshBasicMaterial
+        color={active 
+          ? (theme === "dark" ? "#34d399" : "#3b82f6") 
+          : (theme === "dark" ? "#10b981" : "#60a5fa")
+        }
+        transparent
+        opacity={active ? 0.9 : 0.22}
+      />
+    </mesh>
+  );
+}
+
+// Upgraded 3D Satellite Node (represents portfolio sections orbiting Earth)
+function SatelliteNode({ id, title, active, onClick, position, theme }) {
+  const groupRef = useRef();
+  const ringRef = useRef();
+  const coreRef = useRef();
+  const [hovered, setHovered] = useState(false);
   const pointerDownPos = useRef({ x: 0, y: 0 });
 
   // Face outwards from center globe
   useEffect(() => {
-    if (meshRef.current) {
+    if (groupRef.current) {
       const [x, y, z] = position;
-      meshRef.current.lookAt(x * 2, y, z * 2);
+      groupRef.current.lookAt(x * 2, y * 2, z * 2);
     }
   }, [position]);
+
+  useFrame((state) => {
+    const t = state.clock.getElapsedTime();
+    if (ringRef.current) {
+      ringRef.current.rotation.z = t * 1.5;
+    }
+    if (coreRef.current) {
+      const scale = 1 + Math.sin(t * 3.5) * 0.08 + (hovered || active ? 0.18 : 0);
+      coreRef.current.scale.set(scale, scale, scale);
+    }
+  });
 
   const handlePointerDown = (e) => {
     e.stopPropagation();
@@ -239,69 +368,78 @@ function GlassCardNode({ id, title, active, onClick, position, theme, setActiveT
   };
 
   return (
-    <group position={position} ref={meshRef}>
-      {active ? (
-        <group>
-          {/* Solid opaque backdrop backing panel to block background stars/grid */}
-          <mesh>
-            <planeGeometry args={[6.15, 5.15]} />
-            <meshBasicMaterial 
-              color={theme === "dark" ? "#060913" : "#ffffff"} 
-              opacity={0.99} 
-              transparent 
-            />
-          </mesh>
-          <Html transform distanceFactor={5.5} pointerEvents="auto" center>
-            <div className="w-[90vw] md:w-[600px] max-h-[70vh] md:max-h-[550px] overflow-y-auto select-none no-scrollbar glass-panel-3d p-1.5 transition-all duration-300">
-              {id === "about" && <AboutUs profilePicUrl="/027A1497.jpeg" theme={theme} />}
-              {id === "experience" && <WorkExperience theme={theme} />}
-              {id === "console" && <AgentConsole theme={theme} onF1Complete={() => {}} onTabChange={setActiveTab} />}
-              {id === "projects" && <ProjectsComponent theme={theme} />}
-              {id === "skills" && <SkillsComponent theme={theme} />}
-              {id === "blog" && <MediumNotionComponent theme={theme} />}
-            </div>
-          </Html>
-        </group>
-      ) : (
-        /* Inactive orbital satellite card mesh */
-        <mesh 
-          onPointerDown={handlePointerDown} 
-          onPointerUp={handlePointerUp} 
-          className="cursor-pointer"
-        >
-          <planeGeometry args={[4.4, 3.0]} />
-          <meshPhysicalMaterial
-            roughness={0.1}
-            metalness={0.15}
-            transparent
-            opacity={0.65}
-            color={theme === "dark" ? "#090c18" : "#f1f5f9"}
-            transmission={0.8}
-            thickness={0.6}
+    <group 
+      position={position} 
+      ref={groupRef}
+      onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
+      onPointerOut={() => setHovered(false)}
+    >
+      <group 
+        onPointerDown={handlePointerDown} 
+        onPointerUp={handlePointerUp} 
+        className="cursor-pointer"
+      >
+        {/* Pulsing Core Sphere */}
+        <mesh ref={coreRef}>
+          <sphereGeometry args={[0.16, 16, 16]} />
+          <meshBasicMaterial 
+            color={active 
+              ? (theme === "dark" ? "#34d399" : "#2563eb") 
+              : hovered 
+                ? (theme === "dark" ? "#10b981" : "#3b82f6") 
+                : (theme === "dark" ? "#065f46" : "#93c5fd")
+            } 
           />
-          {/* Wire outline glow */}
-          <lineSegments>
-            <edgesGeometry args={[new THREE.PlaneGeometry(4.4, 3.0)]} />
-            <lineBasicMaterial 
-              color={theme === "dark" ? "#10b981" : "#3b82f6"} 
-              linewidth={2} 
-              transparent 
-              opacity={0.8} 
-            />
-          </lineSegments>
-          {/* Floating UI text */}
-          <Html distanceFactor={8} center pointerEvents="none">
-            <div className="flex flex-col items-center justify-center text-center p-4 whitespace-nowrap">
-              <div className={`text-[10px] font-black uppercase tracking-widest ${
-                theme === "dark" ? "text-emerald-400 text-shadow-emerald" : "text-blue-600"
-              }`}>
-                {title}
-              </div>
-              <div className="text-[8px] text-gray-500 mt-1 uppercase tracking-wider">Expand Node</div>
-            </div>
-          </Html>
         </mesh>
-      )}
+
+        {/* Diagonal Rotating Panel Ring */}
+        <mesh ref={ringRef} rotation={[Math.PI / 4, Math.PI / 4, 0]}>
+          <ringGeometry args={[0.24, 0.28, 32]} />
+          <meshBasicMaterial 
+            color={theme === "dark" ? "#10b981" : "#3b82f6"} 
+            side={THREE.DoubleSide} 
+            transparent 
+            opacity={0.65} 
+          />
+        </mesh>
+
+        {/* Outer Bounding Wireframe Cube */}
+        <mesh>
+          <boxGeometry args={[0.42, 0.42, 0.42]} />
+          <meshBasicMaterial 
+            color={theme === "dark" ? "#10b981" : "#3b82f6"} 
+            wireframe 
+            transparent 
+            opacity={active || hovered ? 0.35 : 0.12} 
+          />
+        </mesh>
+      </group>
+
+      {/* Floating HTML Text Label */}
+      <Html distanceFactor={6.5} center pointerEvents="none">
+        <div className="flex flex-col items-center justify-center text-center select-none pt-1">
+          <div className={`px-2.5 py-0.5 rounded-lg border text-[9px] font-black uppercase tracking-wider transition-all duration-300 shadow-md font-mono ${
+            active 
+              ? theme === "dark"
+                ? "bg-emerald-500/25 border-emerald-400 text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                : "bg-blue-500/20 border-blue-500 text-blue-700 shadow-[0_0_8px_rgba(59,130,246,0.2)]"
+              : hovered
+                ? theme === "dark"
+                  ? "bg-slate-900/90 border-emerald-500/50 text-emerald-400"
+                  : "bg-white/95 border-blue-400 text-blue-600"
+                : theme === "dark"
+                  ? "bg-slate-950/75 border-slate-800/60 text-slate-400"
+                  : "bg-white/75 border-slate-200 text-slate-500"
+          }`}>
+            {title}
+          </div>
+          <div className={`text-[7px] mt-0.5 font-bold uppercase tracking-widest transition-opacity duration-300 ${
+            hovered || active ? "opacity-100" : "opacity-0"
+          } ${theme === "dark" ? "text-emerald-400" : "text-blue-500"}`}>
+            {active ? "LINK ACTIVE" : "CONNECT NODE"}
+          </div>
+        </div>
+      </Html>
     </group>
   );
 }
@@ -370,7 +508,6 @@ function CameraRig({ focusSection, controlsRef, isMobile }) {
       }
     } else {
       // If focused on a card, hold camera in place so user is aligned orthogonally
-      // But in Overview "home" mode, DO NOT override coordinates so they can drag freely!
       if (focusSection && focusSection !== "home") {
         state.camera.position.x = targetPos[0];
         state.camera.position.y = targetPos[1];
@@ -395,7 +532,6 @@ export default function ThreeDWorkspace({
   setActiveTab
 }) {
   const controlsRef = useRef();
-  const standingsRef = useRef();
   const [isMobile, setIsMobile] = useState(false);
   const [dismissTour, setDismissTour] = useState(false);
 
@@ -414,20 +550,7 @@ export default function ThreeDWorkspace({
     if (setFocusSection) setFocusSection("home");
   }, [setFocusSection]);
 
-  // Standing panel positioning and lookAt orientation
   const r = 5.2;
-  const standingsPos = useMemo(() => [
-    r * Math.cos((2 * Math.PI) / 3) + 2.4, 
-    -1.2, 
-    r * Math.sin((2 * Math.PI) / 3) - 2.2
-  ], [r]);
-
-  useEffect(() => {
-    if (standingsRef.current) {
-      const [x, y, z] = standingsPos;
-      standingsRef.current.lookAt(x * 2, y, z * 2);
-    }
-  }, [standingsPos]);
 
   // Calculate dynamic wiggling rotation locks based on focused section
   const getLimits = () => {
@@ -479,6 +602,23 @@ export default function ThreeDWorkspace({
     { id: "blog", title: "Publications Blog", angle: (5 * Math.PI) / 3, height: -1.2 }
   ];
 
+  // Quick Prev / Next handlers
+  const handlePrevNode = () => {
+    const currentIndex = nodes.findIndex((n) => n.id === focusSection);
+    if (currentIndex !== -1) {
+      const prevIndex = (currentIndex - 1 + nodes.length) % nodes.length;
+      setFocusSection(nodes[prevIndex].id);
+    }
+  };
+
+  const handleNextNode = () => {
+    const currentIndex = nodes.findIndex((n) => n.id === focusSection);
+    if (currentIndex !== -1) {
+      const nextIndex = (currentIndex + 1) % nodes.length;
+      setFocusSection(nodes[nextIndex].id);
+    }
+  };
+
   return (
     <div className={`fixed inset-0 z-40 transition-colors duration-300 ${
       theme === "dark" ? "bg-gray-950" : "bg-slate-50"
@@ -509,6 +649,12 @@ export default function ThreeDWorkspace({
         {/* Cosmic starfield particles */}
         <Starfield count={400} color={theme === "dark" ? "#10B981" : "#3b82f6"} />
 
+        {/* Perspective Ground Grid Helper */}
+        <gridHelper 
+          args={[26, 26, theme === "dark" ? "#10b981" : "#3b82f6", theme === "dark" ? "#1e293b" : "#e2e8f0"]} 
+          position={[0, -2.8, 0]} 
+        />
+
         {/* Concentric orbital rings surrounding Earth */}
         <OrbitRing radius={4.2} theme={theme} />
         <OrbitRing radius={5.2} theme={theme} />
@@ -518,37 +664,155 @@ export default function ThreeDWorkspace({
         <DottedGlobe theme={theme} />
         <ConnectionArcs theme={theme} />
 
-        {/* Orbiting Satellite Data Nodes */}
+        {/* Orbiting Satellite Data Nodes + Laser links + Telemetry pulses */}
         {nodes.map((node) => {
           const x = r * Math.cos(node.angle);
           const z = r * Math.sin(node.angle);
+          const pos = [x, node.height, z];
+          const isActive = focusSection === node.id;
           return (
-            <GlassCardNode
-              key={node.id}
-              id={node.id}
-              title={node.title}
-              active={focusSection === node.id}
-              onClick={() => setFocusSection(node.id)}
-              position={[x, node.height, z]}
-              theme={theme}
-              setActiveTab={setActiveTab}
-            />
+            <group key={node.id}>
+              {/* Telemetry Laser Beam to Earth Surface */}
+              <TelemetryLaser 
+                start={[0, 0, 0]} 
+                end={pos} 
+                theme={theme} 
+                active={isActive} 
+              />
+              
+              {/* Telemetry Data Pulses */}
+              <DataPulse 
+                start={[0, 0, 0]} 
+                end={pos} 
+                theme={theme} 
+                active={isActive} 
+              />
+
+              {/* Upgraded 3D Satellite Model */}
+              <SatelliteNode
+                id={node.id}
+                title={node.title}
+                active={isActive}
+                onClick={() => setFocusSection(node.id)}
+                position={pos}
+                theme={theme}
+              />
+            </group>
           );
         })}
-
-        {/* Conditional Driver Standings (Floats next to console panel in space) */}
-        {activeTab === "F1 Predictor" && focusSection === "console" && (
-          <mesh ref={standingsRef} position={standingsPos}>
-            <planeGeometry args={[4.5, 3.5]} />
-            <meshBasicMaterial color={theme === "dark" ? "#060913" : "#ffffff"} opacity={0.98} transparent />
-            <Html transform distanceFactor={5.5} pointerEvents="auto" center>
-              <div className="w-[90vw] md:w-[480px] shadow-2xl transition-all duration-300">
-                <DriverStandings />
-              </div>
-            </Html>
-          </mesh>
-        )}
       </Canvas>
+
+      {/* 2D Glassmorphic Detail Panel Overlay (Outside WebGL Canvas for 100% Readability & Smooth Native Scrolling) */}
+      <AnimatePresence>
+        {focusSection && focusSection !== "home" && (
+          <motion.div
+            initial={{ x: isMobile ? 0 : "100%", y: isMobile ? "100%" : 0, opacity: 0 }}
+            animate={{ x: 0, y: 0, opacity: 1 }}
+            exit={{ x: isMobile ? 0 : "100%", y: isMobile ? "100%" : 0, opacity: 0 }}
+            transition={{ type: "spring", damping: 26, stiffness: 130 }}
+            className={`absolute z-50 flex flex-col justify-between overflow-hidden shadow-2xl backdrop-blur-xl border transition-all duration-300 ${
+              isMobile
+                ? "left-0 right-0 bottom-0 h-[75vh] rounded-t-3xl border-t"
+                : "right-6 top-20 bottom-24 w-[550px] rounded-2xl border"
+            } ${
+              theme === "dark"
+                ? "border-emerald-500/25 bg-slate-950/90 text-white shadow-[0_15px_40px_rgba(16,185,129,0.15)]"
+                : "border-slate-200 bg-white/95 text-slate-800 shadow-[0_15px_30px_rgba(15,23,42,0.08)]"
+            }`}
+          >
+            {/* Telemetry Panel Header */}
+            <div className={`px-6 py-4 flex items-center justify-between border-b ${
+              theme === "dark" ? "border-slate-900 bg-slate-950/40" : "border-slate-100 bg-slate-50/50"
+            }`}>
+              <div className="flex items-center gap-2">
+                <span className={`w-2.5 h-2.5 rounded-full ${
+                  theme === "dark" ? "bg-emerald-400 animate-pulse" : "bg-blue-600 animate-pulse"
+                }`} />
+                <div className="flex flex-col">
+                  <span className={`text-[8px] font-mono tracking-widest ${
+                    theme === "dark" ? "text-emerald-400/80" : "text-blue-600/80"
+                  }`}>
+                    DATA SCAN ACTIVE // SEC: {focusSection.toUpperCase()}_NODE
+                  </span>
+                  <h2 className="text-sm font-black uppercase tracking-wider font-mono">
+                    {nodes.find((n) => n.id === focusSection)?.title || "Node Details"}
+                  </h2>
+                </div>
+              </div>
+              <button
+                onClick={() => setFocusSection("home")}
+                className={`p-2 rounded-lg transition-colors text-xs font-bold ${
+                  theme === "dark" 
+                    ? "hover:bg-slate-900 text-gray-400 hover:text-white" 
+                    : "hover:bg-slate-100 text-slate-500 hover:text-slate-900"
+                }`}
+              >
+                ✕ Close
+              </button>
+            </div>
+
+            {/* Scrollable Content Container (Perfect text-selection, scrolling, and responsiveness) */}
+            <div className="flex-1 overflow-y-auto px-6 py-4 custom-scrollbar select-text">
+              {focusSection === "about" && <AboutUs profilePicUrl="/027A1497.jpeg" theme={theme} />}
+              {focusSection === "experience" && <WorkExperience theme={theme} />}
+              {focusSection === "console" && (
+                <div className="pt-2 space-y-4">
+                  <AgentConsole theme={theme} onF1Complete={() => {}} onTabChange={setActiveTab} />
+                  {activeTab === "F1 Predictor" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`mt-4 border-t border-dashed pt-4 ${
+                        theme === "dark" ? "border-slate-800" : "border-slate-200"
+                      }`}
+                    >
+                      <DriverStandings />
+                    </motion.div>
+                  )}
+                </div>
+              )}
+              {focusSection === "projects" && <ProjectsComponent theme={theme} />}
+              {focusSection === "skills" && <SkillsComponent theme={theme} />}
+              {focusSection === "blog" && <MediumNotionComponent theme={theme} />}
+            </div>
+
+            {/* Diagnostics & Navigation Panel Footer */}
+            <div className={`px-6 py-3.5 flex items-center justify-between border-t ${
+              theme === "dark" ? "border-slate-900 bg-slate-950/40" : "border-slate-100 bg-slate-50/50"
+            }`}>
+              {/* Diagnostic Log Details */}
+              <div className="hidden sm:flex flex-col text-[8px] font-mono text-gray-500 select-none">
+                <span>COORD: ALT: {nodes.find((n) => n.id === focusSection)?.height.toFixed(2)} &bull; ANG: {nodes.find((n) => n.id === focusSection)?.angle.toFixed(2)}</span>
+                <span>STATUS: TELEMETRY_STREAM_OK // 60 FPS</span>
+              </div>
+              
+              {/* Prev / Next Quick Nav Controls */}
+              <div className="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-start">
+                <button
+                  onClick={handlePrevNode}
+                  className={`px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-wider transition-all duration-300 ${
+                    theme === "dark"
+                      ? "border-slate-800 bg-slate-900 text-gray-400 hover:text-emerald-400 hover:border-emerald-500/30"
+                      : "border-slate-200 bg-slate-50 text-slate-500 hover:text-blue-600 hover:border-blue-500/30"
+                  }`}
+                >
+                  &larr; Prev Node
+                </button>
+                <button
+                  onClick={handleNextNode}
+                  className={`px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-wider transition-all duration-300 ${
+                    theme === "dark"
+                      ? "border-slate-800 bg-slate-900 text-gray-400 hover:text-emerald-400 hover:border-emerald-500/30"
+                      : "border-slate-200 bg-slate-50 text-slate-500 hover:text-blue-600 hover:border-blue-500/30"
+                  }`}
+                >
+                  Next Node &rarr;
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* RETURN TO ORBIT VIEW HUD LINK */}
       {focusSection && focusSection !== "home" && (
@@ -565,52 +829,62 @@ export default function ThreeDWorkspace({
       )}
 
       {/* SPACE HUD COMMAND CONSOLE OVERLAY */}
-      <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-wrap items-center justify-center gap-2.5 px-5 py-2.5 rounded-full border shadow-2xl max-w-[90vw] transition-all duration-300 ${
+      <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 px-6 py-3 rounded-2xl border shadow-2xl max-w-[90vw] transition-all duration-300 ${
         theme === "dark"
-          ? "border-gray-800 bg-slate-950/85 text-white shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+          ? "border-emerald-500/30 bg-slate-950/90 text-white shadow-[0_10px_30px_rgba(16,185,129,0.15)]"
           : "border-slate-200 bg-white/95 text-slate-800 shadow-[0_10px_20px_rgba(15,23,42,0.08)]"
       }`}>
-        <button
-          onClick={() => setFocusSection("home")}
-          className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider transition-all duration-300 border ${
-            (!focusSection || focusSection === "home") 
-              ? theme === "dark"
-                ? "text-emerald-400 bg-emerald-500/20 border-emerald-500/40" 
-                : "text-blue-600 bg-blue-500/10 border-blue-500/30"
-              : "text-gray-400 border-transparent hover:text-current"
-          }`}
-        >
-          Overview Space
-        </button>
-        <div className="h-4 w-px bg-gray-800 hidden sm:block"></div>
-        {nodes.map((sec) => (
+        {/* Sci-Fi Telemetry HUD Header */}
+        <div className={`flex items-center justify-between w-full text-[8px] font-mono tracking-widest select-none pb-1 border-b border-gray-800/40 ${
+          theme === "dark" ? "text-emerald-500/70" : "text-blue-500/70"
+        }`}>
+          <span>DATA LINK: SECURE</span>
+          <span className="animate-pulse">ORBITAL SCAN RUNNING</span>
+          <span>LAT: 34.11 &bull; LNG: -117.30</span>
+        </div>
+        <div className="flex flex-wrap items-center justify-center gap-2.5">
           <button
-            key={sec.id}
-            onClick={() => setFocusSection(sec.id)}
+            onClick={() => setFocusSection("home")}
             className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider transition-all duration-300 border ${
-              focusSection === sec.id 
+              (!focusSection || focusSection === "home") 
                 ? theme === "dark"
                   ? "text-emerald-400 bg-emerald-500/20 border-emerald-500/40" 
                   : "text-blue-600 bg-blue-500/10 border-blue-500/30"
                 : "text-gray-400 border-transparent hover:text-current"
             }`}
           >
-            {sec.title.split(" ")[0]} {/* Show first word for space constraints */}
+            Overview Space
           </button>
-        ))}
+          <div className="h-4 w-px bg-gray-800/40 hidden sm:block"></div>
+          {nodes.map((sec) => (
+            <button
+              key={sec.id}
+              onClick={() => setFocusSection(sec.id)}
+              className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider transition-all duration-300 border ${
+                focusSection === sec.id 
+                  ? theme === "dark"
+                    ? "text-emerald-400 bg-emerald-500/20 border-emerald-500/40" 
+                    : "text-blue-600 bg-blue-500/10 border-blue-500/30"
+                  : "text-gray-400 border-transparent hover:text-current"
+              }`}
+            >
+              {sec.title.split(" ")[0]} {/* Show first word for space constraints */}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* SPACE TOUR GUIDE ONBOARDING OVERLAY */}
       {!dismissTour && (
-        <div className={`absolute top-20 right-6 z-50 w-[300px] max-w-[calc(100vw-3rem)] rounded-2xl border p-5 shadow-[0_15px_40px_rgba(0,0,0,0.6)] backdrop-blur-md text-white transition-all duration-500 ${
+        <div className={`absolute top-20 right-6 z-50 w-[300px] max-w-[calc(100vw-3rem)] rounded-2xl border p-5 shadow-[0_15px_40px_rgba(0,0,0,0.6)] backdrop-blur-md transition-all duration-500 ${
           theme === "dark" 
-            ? "border-emerald-500/30 bg-slate-950/92" 
-            : "border-slate-200 bg-white/95 text-slate-800"
+            ? "border-emerald-500/30 bg-slate-950/92 text-white shadow-[0_10px_35px_rgba(16,185,129,0.15)]" 
+            : "border-slate-200 bg-white/95 text-slate-800 shadow-[0_10px_20px_rgba(15,23,42,0.06)]"
         }`}>
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-3 border-b border-gray-800/40 pb-2">
             <div className="flex items-center gap-2">
               <span className={`w-2 h-2 rounded-full ${theme === "dark" ? "bg-emerald-400 animate-pulse" : "bg-blue-500 animate-pulse"}`}></span>
-              <h3 className={`text-xs font-bold uppercase tracking-wider ${theme === "dark" ? "text-emerald-400" : "text-blue-600"}`}>Orbital Telemetry Scan</h3>
+              <h3 className={`text-xs font-bold uppercase tracking-wider ${theme === "dark" ? "text-emerald-400" : "text-blue-600"}`}>System Initialized</h3>
             </div>
             <button 
               onClick={() => setDismissTour(true)}
@@ -619,17 +893,19 @@ export default function ThreeDWorkspace({
               ✕
             </button>
           </div>
+          <h4 className="text-[11px] font-bold uppercase tracking-widest mb-1.5 text-current">Holographic Space</h4>
           <p className={`text-[11px] leading-relaxed mb-4 ${theme === "dark" ? "text-gray-300" : "text-slate-600"}`}>
-            Inspect Bharat's tech deployments connected globally around this 3D sphere:
+            Inspect Bharat's tech deployments connected globally around this 3D sphere.
+            Toggle between the 3D Space and the 2D Classic mode anytime in the header.
           </p>
           <div className="space-y-3 mb-4">
             <div className="flex items-start gap-2 text-[10px] leading-normal">
-              <span className={`font-bold ${theme === "dark" ? "text-emerald-400" : "text-blue-600"}`}>1. Orbiting Satellites:</span>
-              <span className={theme === "dark" ? "text-gray-400" : "text-slate-500"}>Click any orbiting satellite panel or text tag to zoom into that workspace module.</span>
+              <span className={`font-bold ${theme === "dark" ? "text-emerald-400" : "text-blue-600"}`}>1. 3D Satellites:</span>
+              <span className={theme === "dark" ? "text-gray-400" : "text-slate-500"}>Click any floating satellite or title tag in the 3D space to trigger node selection.</span>
             </div>
             <div className="flex items-start gap-2 text-[10px] leading-normal">
-              <span className={`font-bold ${theme === "dark" ? "text-emerald-400" : "text-blue-600"}`}>2. Crisp Display:</span>
-              <span className={theme === "dark" ? "text-gray-400" : "text-slate-500"}>Focused panels align perfectly flat and lock rotation, ensuring crisp text readability.</span>
+              <span className={`font-bold ${theme === "dark" ? "text-emerald-400" : "text-blue-600"}`}>2. 2D HUD Console:</span>
+              <span className={theme === "dark" ? "text-gray-400" : "text-slate-500"}>Enjoy 100% crisp typography, native smooth scrolling, and perfect touch response.</span>
             </div>
           </div>
           <div className="flex items-center gap-2">

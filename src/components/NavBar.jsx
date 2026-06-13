@@ -48,7 +48,13 @@ const NavBarComponent = ({ scrollToSection, refs, theme, toggleTheme, viewMode =
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <img src={Blogo} alt="logo" className="h-10 w-10 animate-pulse" />
+            <img 
+              src={Blogo} 
+              alt="logo" 
+              className={`h-10 w-10 animate-pulse transition-all duration-300 ${
+                theme === "light" ? "invert brightness-90 contrast-125" : ""
+              }`} 
+            />
           </div>
 
           {/* Desktop Menu */}

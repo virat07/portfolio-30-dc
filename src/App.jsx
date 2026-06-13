@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import NavBarComponent from "./components/NavBar";
 import FooterComponent from "./components/FooterComponent";
@@ -20,6 +20,40 @@ export default function App() {
   const [activeTab, setActiveTab] = useState("Digital Twin");
   const [viewMode, setViewMode] = useState("2d"); // "2d" or "3d"
   const [focusSection, setFocusSection] = useState(null);
+
+  useEffect(() => {
+    const favicon = document.querySelector("link[rel='icon']");
+    if (favicon) {
+      if (theme === "light") {
+        const img = new Image();
+        img.src = "/BIcon.png";
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0);
+          
+          try {
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imgData.data;
+            for (let i = 0; i < data.length; i += 4) {
+              // Invert red, green, blue channels, keep alpha channel
+              data[i] = 255 - data[i];
+              data[i + 1] = 255 - data[i + 1];
+              data[i + 2] = 255 - data[i + 2];
+            }
+            ctx.putImageData(imgData, 0, 0);
+            favicon.setAttribute("href", canvas.toDataURL());
+          } catch (e) {
+            console.error("Failed to invert favicon: ", e);
+          }
+        };
+      } else {
+        favicon.setAttribute("href", "/BIcon.png");
+      }
+    }
+  }, [theme]);
 
   const toggleTheme = () => {
     const nextTheme = theme === "dark" ? "light" : "dark";
