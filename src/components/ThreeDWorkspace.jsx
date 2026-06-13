@@ -12,17 +12,16 @@ import AgentConsole from "./AgentConsole";
 import DriverStandings from "./DriverStandings";
 import MediumNotionComponent from "./MediumNotionComponent";
 
-// Starfield particles for 3D atmosphere
-function Starfield({ count = 400, color = "#10B981" }) {
+// Cosmic Starfield particles for background
+function Starfield({ count = 450, color = "#10B981" }) {
   const pointsRef = useRef();
 
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      // Spherical distribution
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos((Math.random() * 2) - 1);
-      const r = 9 + Math.random() * 9; // radius between 9 and 18
+      const r = 10 + Math.random() * 12; // radius between 10 and 22
 
       arr[i * 3] = r * Math.sin(phi) * Math.cos(theta);
       arr[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
@@ -33,8 +32,8 @@ function Starfield({ count = 400, color = "#10B981" }) {
 
   useFrame((state) => {
     if (pointsRef.current) {
-      pointsRef.current.rotation.y = state.clock.getElapsedTime() * 0.012;
-      pointsRef.current.rotation.x = state.clock.getElapsedTime() * 0.003;
+      pointsRef.current.rotation.y = state.clock.getElapsedTime() * 0.008;
+      pointsRef.current.rotation.x = state.clock.getElapsedTime() * 0.002;
     }
   });
 
@@ -49,219 +48,283 @@ function Starfield({ count = 400, color = "#10B981" }) {
       <PointMaterial
         transparent
         color={color}
-        size={0.06}
+        size={0.07}
         sizeAttenuation={true}
         depthWrite={false}
-        opacity={0.35}
+        opacity={0.4}
       />
     </points>
   );
 }
 
-// 3D Core - AI Orb (renders morphing liquid sphere & local particles)
-function AICore() {
-  const orbRef = useRef();
+// Procedural Dotted Globe representing Earth (Holographic Global)
+function DottedGlobe({ theme }) {
+  const globeRef = useRef();
+
+  const positions = useMemo(() => {
+    const count = 850;
+    const arr = new Float32Array(count * 3);
+    const radius = 1.95;
+    for (let i = 0; i < count; i++) {
+      const y = 1 - (i / (count - 1)) * 2;
+      const rAtY = Math.sqrt(1 - y * y);
+      const theta = 1.618033988749 * 2 * Math.PI * i; // golden angle
+      arr[i * 3] = Math.cos(theta) * rAtY * radius;
+      arr[i * 3 + 1] = y * radius;
+      arr[i * 3 + 2] = Math.sin(theta) * rAtY * radius;
+    }
+    return arr;
+  }, []);
 
   useFrame((state) => {
-    if (orbRef.current) {
-      orbRef.current.rotation.y = state.clock.getElapsedTime() * 0.2;
-      orbRef.current.rotation.z = state.clock.getElapsedTime() * 0.1;
+    if (globeRef.current) {
+      globeRef.current.rotation.y = state.clock.getElapsedTime() * 0.04;
     }
   });
 
   return (
-    <group position={[0, 0.5, 0]}>
-      <mesh ref={orbRef}>
-        <sphereGeometry args={[1.0, 64, 64]} />
+    <group>
+      <points ref={globeRef}>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+        </bufferGeometry>
+        <PointMaterial
+          transparent
+          color={theme === "dark" ? "#10b981" : "#3b82f6"}
+          size={0.06}
+          sizeAttenuation={true}
+          depthWrite={false}
+          opacity={0.65}
+        />
+      </points>
+      {/* Subtle morphing liquid core representing Earth's magma/core energy */}
+      <mesh>
+        <sphereGeometry args={[1.2, 32, 32]} />
         <MeshDistortMaterial
-          color="#10B981"
-          attach="material"
-          distort={0.4}
-          speed={2.2}
-          roughness={0.15}
-          metalness={0.8}
+          color={theme === "dark" ? "#06b6d4" : "#6366f1"}
+          distort={0.3}
+          speed={1.5}
+          roughness={0.2}
+          metalness={0.9}
+          transparent
+          opacity={0.15}
         />
       </mesh>
-      <Starfield count={100} color="#06b6d4" />
     </group>
   );
 }
 
-// 3D Core - F1 Telemetry wave
-function F1Core() {
-  const lineRef1 = useRef();
-  const lineRef2 = useRef();
-
-  useFrame((state) => {
-    const t = state.clock.getElapsedTime();
-    if (lineRef1.current) {
-      const positions = lineRef1.current.geometry.attributes.position.array;
-      for (let i = 0; i < 40; i++) {
-        const x = (i - 20) * 0.12;
-        positions[i * 3 + 1] = Math.sin(x * 1.5 + t * 4) * 0.35 * Math.cos(x * 0.4);
-        positions[i * 3 + 2] = Math.cos(x * 1.2 + t * 2) * 0.15;
-      }
-      lineRef1.current.geometry.attributes.position.needsUpdate = true;
-    }
-    if (lineRef2.current) {
-      const positions = lineRef2.current.geometry.attributes.position.array;
-      for (let i = 0; i < 40; i++) {
-        const x = (i - 20) * 0.12;
-        positions[i * 3 + 1] = Math.cos(x * 2.0 - t * 3) * 0.25 * Math.sin(x * 0.5);
-        positions[i * 3 + 2] = Math.sin(x * 0.7 + t * 1.8) * 0.2;
-      }
-      lineRef2.current.geometry.attributes.position.needsUpdate = true;
-    }
-  });
-
-  return (
-    <group position={[0, 0.5, 0]}>
-      <line ref={lineRef1}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[new Float32Array(40 * 3), 3]}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial color="#10B981" linewidth={2.5} />
-      </line>
-      <line ref={lineRef2}>
-        <bufferGeometry>
-          <bufferAttribute
-            attach="attributes-position"
-            args={[new Float32Array(40 * 3), 3]}
-          />
-        </bufferGeometry>
-        <lineBasicMaterial color="#06b6d4" linewidth={1.5} />
-      </line>
-    </group>
-  );
-}
-
-// 3D Core - Stock Bars
-function StockCore() {
+// Glowing global connection telemetry lines wrapping the globe
+function ConnectionArcs({ theme }) {
   const groupRef = useRef();
-  const barRef1 = useRef();
-  const barRef2 = useRef();
-  const barRef3 = useRef();
+
+  const arcs = useMemo(() => {
+    const list = [];
+    const radius = 1.95;
+    for (let j = 0; j < 8; j++) {
+      const theta1 = Math.random() * Math.PI * 2;
+      const phi1 = Math.acos((Math.random() * 2) - 1);
+      const p1 = new THREE.Vector3(
+        radius * Math.sin(phi1) * Math.cos(theta1),
+        radius * Math.sin(phi1) * Math.sin(theta1),
+        radius * Math.cos(phi1)
+      );
+
+      const theta2 = Math.random() * Math.PI * 2;
+      const phi2 = Math.acos((Math.random() * 2) - 1);
+      const p2 = new THREE.Vector3(
+        radius * Math.sin(phi2) * Math.cos(theta2),
+        radius * Math.sin(phi2) * Math.sin(theta2),
+        radius * Math.cos(phi2)
+      );
+
+      // Make it rise above sphere
+      const mid = new THREE.Vector3().addVectors(p1, p2).multiplyScalar(0.5);
+      mid.normalize().multiplyScalar(radius * (1.12 + Math.random() * 0.22));
+
+      const curve = new THREE.QuadraticBezierCurve3(p1, mid, p2);
+      const points = curve.getPoints(25);
+      const positions = new Float32Array(points.length * 3);
+      for (let i = 0; i < points.length; i++) {
+        positions[i * 3] = points[i].x;
+        positions[i * 3 + 1] = points[i].y;
+        positions[i * 3 + 2] = points[i].z;
+      }
+      list.push(positions);
+    }
+    return list;
+  }, []);
 
   useFrame((state) => {
-    const t = state.clock.getElapsedTime();
     if (groupRef.current) {
-      groupRef.current.rotation.y = t * 0.12;
+      groupRef.current.rotation.y = state.clock.getElapsedTime() * 0.04;
     }
-    if (barRef1.current) barRef1.current.scale.y = 1.0 + Math.sin(t * 2.5) * 0.4;
-    if (barRef2.current) barRef2.current.scale.y = 1.3 + Math.cos(t * 1.8) * 0.3;
-    if (barRef3.current) barRef3.current.scale.y = 0.8 + Math.sin(t * 3.2) * 0.25;
   });
 
   return (
-    <group ref={groupRef} position={[0, 0.2, 0]}>
-      <mesh ref={barRef1} position={[-0.6, 0, 0]}>
-        <boxGeometry args={[0.2, 1, 0.2]} />
-        <meshStandardMaterial color="#10B981" emissive="#10B981" emissiveIntensity={0.15} />
-      </mesh>
-      <mesh ref={barRef2} position={[0, 0, 0]}>
-        <boxGeometry args={[0.2, 1, 0.2]} />
-        <meshStandardMaterial color="#06b6d4" emissive="#06b6d4" emissiveIntensity={0.15} />
-      </mesh>
-      <mesh ref={barRef3} position={[0.6, 0, 0]}>
-        <boxGeometry args={[0.2, 1, 0.2]} />
-        <meshStandardMaterial color="#eab308" emissive="#eab308" emissiveIntensity={0.15} />
-      </mesh>
+    <group ref={groupRef}>
+      {arcs.map((pos, idx) => (
+        <line key={idx}>
+          <bufferGeometry>
+            <bufferAttribute attach="attributes-position" args={[pos, 3]} />
+          </bufferGeometry>
+          <lineBasicMaterial
+            color={theme === "dark" 
+              ? idx % 2 === 0 ? "#10b981" : "#06b6d4"
+              : idx % 2 === 0 ? "#3b82f6" : "#4f46e5"
+            }
+            linewidth={1.5}
+            transparent
+            opacity={0.4}
+          />
+        </line>
+      ))}
     </group>
   );
 }
 
-// Interactive floating 3D panel label
-function PanelLabel({ title, onClick, active, position = [0, 2.7, 0] }) {
+// Thin glowing orbital ring lines
+function OrbitRing({ radius, theme }) {
+  const points = useMemo(() => {
+    const list = [];
+    const count = 72;
+    for (let i = 0; i <= count; i++) {
+      const angle = (i / count) * Math.PI * 2;
+      list.push(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+    }
+    return new Float32Array(list);
+  }, [radius]);
+
   return (
-    <group position={position}>
-      <Html distanceFactor={8} center pointerEvents="auto">
-        <button
-          onClick={onClick}
-          className={`px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider border transition-all duration-300 shadow-xl flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
-            active
-              ? "bg-emerald-500 text-slate-950 border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.5)] scale-110"
-              : "bg-slate-900/90 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500 hover:text-emerald-300 hover:border-emerald-400 hover:scale-105"
-          }`}
-        >
-          <span className={`w-1.5 h-1.5 rounded-full ${active ? "bg-slate-950 animate-pulse" : "bg-emerald-400"}`}></span>
-          {title}
-        </button>
-      </Html>
+    <line rotation={[0.08, 0, 0.04]}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[points, 3]} />
+      </bufferGeometry>
+      <lineBasicMaterial
+        color={theme === "dark" ? "#10b981" : "#3b82f6"}
+        transparent
+        opacity={0.12}
+        linewidth={1}
+      />
+    </line>
+  );
+}
+
+// Orbital Glass Card Node (represents portfolio sections orbiting Earth)
+function GlassCardNode({ id, title, active, onClick, position, theme }) {
+  const meshRef = useRef();
+
+  // Face outwards from center globe
+  useEffect(() => {
+    if (meshRef.current) {
+      const [x, y, z] = position;
+      meshRef.current.lookAt(x * 2, y, z * 2);
+    }
+  }, [position]);
+
+  return (
+    <group position={position} ref={meshRef}>
+      {active ? (
+        <group>
+          {/* Solid opaque backdrop backing panel to block background stars/grid */}
+          <mesh>
+            <planeGeometry args={[6.15, 5.15]} />
+            <meshBasicMaterial 
+              color={theme === "dark" ? "#060913" : "#ffffff"} 
+              opacity={0.99} 
+              transparent 
+            />
+          </mesh>
+          <Html transform distanceFactor={5.5} pointerEvents="auto" center>
+            <div className="w-[90vw] md:w-[600px] max-h-[70vh] md:max-h-[550px] overflow-y-auto select-none no-scrollbar glass-panel-3d p-1.5 transition-all duration-300">
+              {id === "about" && <AboutUs profilePicUrl="/027A1497.jpeg" theme={theme} />}
+              {id === "experience" && <WorkExperience theme={theme} />}
+              {id === "console" && <AgentConsole theme={theme} onF1Complete={() => {}} onTabChange={() => {}} />}
+              {id === "projects" && <ProjectsComponent theme={theme} />}
+              {id === "skills" && <SkillsComponent theme={theme} />}
+              {id === "blog" && <MediumNotionComponent theme={theme} />}
+            </div>
+          </Html>
+        </group>
+      ) : (
+        /* Inactive orbital satellite card mesh */
+        <mesh onClick={onClick} className="cursor-pointer">
+          <planeGeometry args={[4.4, 3.0]} />
+          <meshPhysicalMaterial
+            roughness={0.1}
+            metalness={0.15}
+            transparent
+            opacity={0.65}
+            color={theme === "dark" ? "#090c18" : "#f1f5f9"}
+            transmission={0.8}
+            thickness={0.6}
+          />
+          {/* Wire outline glow */}
+          <lineSegments>
+            <edgesGeometry args={[new THREE.PlaneGeometry(4.4, 3.0)]} />
+            <lineBasicMaterial 
+              color={theme === "dark" ? "#10b981" : "#3b82f6"} 
+              linewidth={2} 
+              transparent 
+              opacity={0.8} 
+            />
+          </lineSegments>
+          {/* Floating UI text */}
+          <Html distanceFactor={8} center pointerEvents="none">
+            <div className="flex flex-col items-center justify-center text-center p-4 whitespace-nowrap">
+              <div className={`text-[10px] font-black uppercase tracking-widest ${
+                theme === "dark" ? "text-emerald-400 text-shadow-emerald" : "text-blue-600"
+              }`}>
+                {title}
+              </div>
+              <div className="text-[8px] text-gray-500 mt-1 uppercase tracking-wider">Expand Node</div>
+            </div>
+          </Html>
+        </mesh>
+      )}
     </group>
   );
 }
 
-// Rig to smoothly animate the camera position and OrbitControls target
+// Camera flight rigging component
 function CameraRig({ focusSection, controlsRef, isMobile }) {
   useFrame((state) => {
-    let targetPos = isMobile ? [0, 2.5, 11.5] : [0, 1.8, 9.5];
+    let targetPos = isMobile ? [0, 2.5, 12.0] : [0, 1.8, 10.0];
     let targetLook = [0, 0.5, 0];
 
-    // Close-up focus distance to ensure high text readability without blur
-    const d = isMobile ? 4.6 : 3.4;
+    const d = isMobile ? 4.8 : 3.5;
+    const r = 5.2;
 
-    switch (focusSection) {
-      case "home":
-        targetPos = isMobile ? [0, 2.0, 11.0] : [0, 1.2, 9.0];
-        targetLook = [0, 0.5, 0];
-        break;
-      case "about": {
-        // Orthogonal angle ry = Math.PI / 4.5
-        const ry = Math.PI / 4.5;
-        targetPos = [-5 + d * Math.sin(ry), 0.5, 2 + d * Math.cos(ry)];
-        targetLook = [-5, 0.5, 2];
-        break;
+    if (focusSection && focusSection !== "home") {
+      const sections = [
+        { id: "about", angle: 0, height: 0.6 },
+        { id: "experience", angle: Math.PI / 3, height: -0.8 },
+        { id: "console", angle: (2 * Math.PI) / 3, height: 0.0 },
+        { id: "projects", angle: Math.PI, height: 0.8 },
+        { id: "skills", angle: (4 * Math.PI) / 3, height: 1.2 },
+        { id: "blog", angle: (5 * Math.PI) / 3, height: -1.2 }
+      ];
+      const sec = sections.find((s) => s.id === focusSection);
+      if (sec) {
+        const x = r * Math.cos(sec.angle);
+        const z = r * Math.sin(sec.angle);
+        const y = sec.height;
+        // Glide camera directly parallel to the card face (orthogonal)
+        targetPos = [x + d * Math.cos(sec.angle), y, z + d * Math.sin(sec.angle)];
+        targetLook = [x, y, z];
       }
-      case "experience": {
-        // Orthogonal angle ry = Math.PI / 12
-        const ry = Math.PI / 12;
-        targetPos = [-2.5 + d * Math.sin(ry), -0.5, -3 + d * Math.cos(ry)];
-        targetLook = [-2.5, -0.5, -3];
-        break;
-      }
-      case "console": {
-        // Orthogonal angle ry = -Math.PI / 12
-        const ry = -Math.PI / 12;
-        targetPos = [2.5 + d * Math.sin(ry), -0.5, -3 + d * Math.cos(ry)];
-        targetLook = [2.5, -0.5, -3];
-        break;
-      }
-      case "projects": {
-        // Orthogonal angle ry = -Math.PI / 4.5
-        const ry = -Math.PI / 4.5;
-        targetPos = [5 + d * Math.sin(ry), 0.5, 2 + d * Math.cos(ry)];
-        targetLook = [5, 0.5, 2];
-        break;
-      }
-      case "skills": {
-        // Orthogonal angle rx = Math.PI / 8
-        const rx = Math.PI / 8;
-        targetPos = [0, 4.5 + d * Math.sin(rx), -2 + d * Math.cos(rx)];
-        targetLook = [0, 4.5, -2];
-        break;
-      }
-      case "blog": {
-        // Orthogonal angle rx = -Math.PI / 8
-        const rx = -Math.PI / 8;
-        targetPos = [0, -4.5 + d * Math.sin(rx), -1 + d * Math.cos(rx)];
-        targetLook = [0, -4.5, -1];
-        break;
-      }
-      default:
-        targetPos = isMobile ? [0, 2.5, 11.5] : [0, 1.8, 9.5];
-        targetLook = [0, 0.5, 0];
-        break;
+    } else {
+      // Wide overview camera angle
+      targetPos = isMobile ? [0, 2.5, 11.5] : [0, 1.8, 9.5];
+      targetLook = [0, 0.5, 0];
     }
 
-    // Smooth camera interpolation
+    // Camera positioning lerp
     state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, targetPos[0], 0.08);
     state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetPos[1], 0.08);
     state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, targetPos[2], 0.08);
 
-    // Smooth OrbitControls target interpolation
+    // OrbitControls center focus target lerp
     if (controlsRef.current) {
       controlsRef.current.target.x = THREE.MathUtils.lerp(controlsRef.current.target.x, targetLook[0], 0.08);
       controlsRef.current.target.y = THREE.MathUtils.lerp(controlsRef.current.target.y, targetLook[1], 0.08);
@@ -283,7 +346,7 @@ export default function ThreeDWorkspace({
   const [isMobile, setIsMobile] = useState(false);
   const [dismissTour, setDismissTour] = useState(false);
 
-  // SSR-safe check for window size
+  // SSR-safe check for window resize
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -293,59 +356,61 @@ export default function ThreeDWorkspace({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Reset focusSection on initial load to "home" overview
+  // Set default view to overview on mount
   useEffect(() => {
     if (setFocusSection) setFocusSection("home");
   }, [setFocusSection]);
 
-  // Restricting camera angles dynamically on zoom to prevent getting lost
+  // Calculate dynamic wiggling rotation locks based on focused section
   const getLimits = () => {
     if (!focusSection || focusSection === "home") {
       return {
         minAzimuth: -Infinity,
         maxAzimuth: Infinity,
         minPolar: 0.1,
-        maxPolar: Math.PI / 2 - 0.05 // stay above grid floor
+        maxPolar: Math.PI / 2 - 0.05
       };
     }
 
-    let targetRy = 0;
-    let targetRx = 0;
+    const sections = [
+      { id: "about", angle: 0 },
+      { id: "experience", angle: Math.PI / 3 },
+      { id: "console", angle: (2 * Math.PI) / 3 },
+      { id: "projects", angle: Math.PI },
+      { id: "skills", angle: (4 * Math.PI) / 3 },
+      { id: "blog", angle: (5 * Math.PI) / 3 }
+    ];
 
-    switch (focusSection) {
-      case "about":
-        targetRy = Math.PI / 4.5;
-        break;
-      case "experience":
-        targetRy = Math.PI / 12;
-        break;
-      case "console":
-        targetRy = -Math.PI / 12;
-        break;
-      case "projects":
-        targetRy = -Math.PI / 4.5;
-        break;
-      case "skills":
-        targetRx = Math.PI / 8;
-        break;
-      case "blog":
-        targetRx = -Math.PI / 8;
-        break;
-      default:
-        break;
+    const sec = sections.find((s) => s.id === focusSection);
+    if (sec) {
+      return {
+        minAzimuth: sec.angle - 0.18,
+        maxAzimuth: sec.angle + 0.18,
+        minPolar: Math.PI / 2 - 0.12,
+        maxPolar: Math.PI / 2 + 0.12
+      };
     }
 
-    // Allow a +/- 11 degrees azimuth and polar wiggle for responsive parallax feel
     return {
-      minAzimuth: targetRy - 0.2,
-      maxAzimuth: targetRy + 0.2,
-      minPolar: Math.PI / 2 - targetRx - 0.15,
-      maxPolar: Math.PI / 2 - targetRx + 0.15
+      minAzimuth: -Infinity,
+      maxAzimuth: Infinity,
+      minPolar: 0.1,
+      maxPolar: Math.PI / 2 - 0.05
     };
   };
 
   const limits = getLimits();
-  const distanceFactor = isMobile ? 3.8 : 5.5;
+
+  // Nodes configuration
+  const r = 5.2;
+  const nodes = [
+    { id: "about", title: "About Me", angle: 0, height: 0.6 },
+    { id: "experience", title: "Work Experience", angle: Math.PI / 3, height: -0.8 },
+    { id: "console", title: "Agent Console", angle: (2 * Math.PI) / 3, height: 0.0 },
+    { id: "projects", title: "Featured Projects", angle: Math.PI, height: 0.8 },
+    { id: "skills", title: "Skills Constellation", angle: (4 * Math.PI) / 3, height: 1.2 },
+    { id: "blog", title: "Publications Blog", angle: (5 * Math.PI) / 3, height: -1.2 }
+  ];
 
   return (
     <div className={`fixed inset-0 z-40 transition-colors duration-300 ${
@@ -354,161 +419,62 @@ export default function ThreeDWorkspace({
       {/* 3D WebGL Canvas */}
       <Canvas camera={{ position: [0, 2, 11], fov: 55 }}>
         {/* Lights */}
-        <ambientLight intensity={theme === "dark" ? 0.7 : 0.9} />
-        <pointLight position={[10, 10, 10]} intensity={1.2} />
-        <directionalLight position={[-5, 5, 5]} intensity={0.8} />
+        <ambientLight intensity={theme === "dark" ? 0.75 : 0.95} />
+        <pointLight position={[10, 10, 10]} intensity={1.3} />
+        <directionalLight position={[-5, 5, 5]} intensity={0.9} />
 
-        {/* Orbit Controls with Dynamic Limits */}
+        {/* Orbit Controls with dynamic wiggling constraints */}
         <OrbitControls
           ref={controlsRef}
           enableZoom={true}
           maxDistance={18}
           minDistance={2.5}
-          enablePan={false} // Disable panning to keep panels centered
+          enablePan={false}
           minAzimuthAngle={limits.minAzimuth}
           maxAzimuthAngle={limits.maxAzimuth}
           minPolarAngle={limits.minPolar}
           maxPolarAngle={limits.maxPolar}
         />
 
-        {/* Camera Lerp Controller */}
+        {/* Space Flight camera rigging */}
         <CameraRig focusSection={focusSection} controlsRef={controlsRef} isMobile={isMobile} />
 
-        {/* Ambient Atmosphere */}
-        <Starfield count={300} color={theme === "dark" ? "#10B981" : "#3b82f6"} />
-        <gridHelper 
-          args={[22, 22, theme === "dark" ? "#10b981" : "#3b82f6", theme === "dark" ? "#1e293b" : "#e2e8f0"]} 
-          position={[0, -2.5, 0]} 
-        />
+        {/* Cosmic starfield particles */}
+        <Starfield count={400} color={theme === "dark" ? "#10B981" : "#3b82f6"} />
 
-        {/* Central Dynamic Holographic Core */}
-        {activeTab === "Digital Twin" && <AICore />}
-        {activeTab === "F1 Predictor" && <F1Core />}
-        {activeTab === "Stock-bot" && <StockCore />}
+        {/* Concentric orbital rings surrounding Earth */}
+        <OrbitRing radius={4.2} theme={theme} />
+        <OrbitRing radius={5.2} theme={theme} />
+        <OrbitRing radius={6.2} theme={theme} />
 
-        {/* 3D PANELS MOUNTED AS FLOATING HTML GLASS PANELS */}
+        {/* Central Dotted Hologram Globe & Connection Arcs */}
+        <DottedGlobe theme={theme} />
+        <ConnectionArcs theme={theme} />
 
-        {/* Panel 1: About Me (Left) */}
-        <mesh position={[-5, 0.5, 2]} rotation={[0, Math.PI / 4.5, 0]}>
-          <planeGeometry args={[6.0, 5.0]} />
-          <meshBasicMaterial transparent opacity={0.0} depthWrite={false} />
-          
-          <PanelLabel 
-            title="About Me" 
-            active={focusSection === "about"} 
-            onClick={() => setFocusSection("about")} 
-            position={[0, 2.7, 0]} 
-          />
+        {/* Orbiting Satellite Data Nodes */}
+        {nodes.map((node) => {
+          const x = r * Math.cos(node.angle);
+          const z = r * Math.sin(node.angle);
+          return (
+            <GlassCardNode
+              key={node.id}
+              id={node.id}
+              title={node.title}
+              active={focusSection === node.id}
+              onClick={() => setFocusSection(node.id)}
+              position={[x, node.height, z]}
+              theme={theme}
+            />
+          );
+        })}
 
-          <Html transform distanceFactor={distanceFactor} pointerEvents="auto" center>
-            <div className="w-[90vw] md:w-[600px] max-h-[70vh] md:max-h-[550px] overflow-y-auto select-none no-scrollbar glass-panel-3d p-1.5 transition-all duration-300 transform hover:scale-[1.01]">
-              <AboutUs profilePicUrl="/027A1497.jpeg" theme={theme} />
-            </div>
-          </Html>
-        </mesh>
-
-        {/* Panel 2: Work Experience (Center-Left) */}
-        <mesh position={[-2.5, -0.5, -3]} rotation={[0, Math.PI / 12, 0]}>
-          <planeGeometry args={[6.0, 5.0]} />
-          <meshBasicMaterial transparent opacity={0.0} depthWrite={false} />
-          
-          <PanelLabel 
-            title="Experience" 
-            active={focusSection === "experience"} 
-            onClick={() => setFocusSection("experience")} 
-            position={[0, 2.7, 0]} 
-          />
-
-          <Html transform distanceFactor={distanceFactor} pointerEvents="auto" center>
-            <div className="w-[90vw] md:w-[600px] max-h-[65vh] md:max-h-[500px] overflow-y-auto select-none no-scrollbar glass-panel-3d p-1.5 transition-all duration-300 transform hover:scale-[1.01]">
-              <WorkExperience theme={theme} />
-            </div>
-          </Html>
-        </mesh>
-
-        {/* Panel 3: Developer Console Terminal (Center-Right) */}
-        <mesh position={[2.5, -0.5, -3]} rotation={[0, -Math.PI / 12, 0]}>
-          <planeGeometry args={[6.0, 5.0]} />
-          <meshBasicMaterial transparent opacity={0.0} depthWrite={false} />
-          
-          <PanelLabel 
-            title="Agent Console" 
-            active={focusSection === "console"} 
-            onClick={() => setFocusSection("console")} 
-            position={[0, 2.7, 0]} 
-          />
-
-          <Html transform distanceFactor={distanceFactor} pointerEvents="auto" center>
-            <div className="w-[90vw] md:w-[600px] max-h-[65vh] md:max-h-[500px] overflow-y-auto select-none no-scrollbar glass-panel-3d p-1.5 transition-all duration-300 transform hover:scale-[1.01]">
-              <AgentConsole theme={theme} onF1Complete={() => {}} onTabChange={setActiveTab} />
-            </div>
-          </Html>
-        </mesh>
-
-        {/* Panel 4: Featured Projects (Right) */}
-        <mesh position={[5, 0.5, 2]} rotation={[0, -Math.PI / 4.5, 0]}>
-          <planeGeometry args={[6.0, 5.0]} />
-          <meshBasicMaterial transparent opacity={0.0} depthWrite={false} />
-          
-          <PanelLabel 
-            title="Featured Projects" 
-            active={focusSection === "projects"} 
-            onClick={() => setFocusSection("projects")} 
-            position={[0, 2.7, 0]} 
-          />
-
-          <Html transform distanceFactor={distanceFactor} pointerEvents="auto" center>
-            <div className="w-[90vw] md:w-[600px] max-h-[70vh] md:max-h-[550px] overflow-y-auto select-none no-scrollbar glass-panel-3d p-1.5 transition-all duration-300 transform hover:scale-[1.01]">
-              <ProjectsComponent theme={theme} />
-            </div>
-          </Html>
-        </mesh>
-
-        {/* Panel 5: Skills Constellation (Top Center) */}
-        <mesh position={[0, 4.5, -2]} rotation={[Math.PI / 8, 0, 0]}>
-          <planeGeometry args={[6.0, 4.5]} />
-          <meshBasicMaterial transparent opacity={0.0} depthWrite={false} />
-          
-          <PanelLabel 
-            title="Skills Constellation" 
-            active={focusSection === "skills"} 
-            onClick={() => setFocusSection("skills")} 
-            position={[0, 2.4, 0]} 
-          />
-
-          <Html transform distanceFactor={distanceFactor} pointerEvents="auto" center>
-            <div className="w-[90vw] md:w-[600px] max-h-[60vh] md:max-h-[450px] overflow-y-auto select-none no-scrollbar glass-panel-3d p-1.5 transition-all duration-300 transform hover:scale-[1.01]">
-              <SkillsComponent theme={theme} />
-            </div>
-          </Html>
-        </mesh>
-
-        {/* Panel 6: Publications Blog (Bottom Center) */}
-        <mesh position={[0, -4.5, -1]} rotation={[-Math.PI / 8, 0, 0]}>
-          <planeGeometry args={[8.0, 4.5]} />
-          <meshBasicMaterial transparent opacity={0.0} depthWrite={false} />
-          
-          <PanelLabel 
-            title="Publications Blog" 
-            active={focusSection === "blog"} 
-            onClick={() => setFocusSection("blog")} 
-            position={[0, 2.4, 0]} 
-          />
-
-          <Html transform distanceFactor={isMobile ? 4.5 : 6.2} pointerEvents="auto" center>
-            <div className="w-[90vw] md:w-[750px] max-h-[60vh] md:max-h-[400px] overflow-y-auto select-none no-scrollbar glass-panel-3d p-1.5 transition-all duration-300 transform hover:scale-[1.01]">
-              <MediumNotionComponent theme={theme} />
-            </div>
-          </Html>
-        </mesh>
-
-        {/* Optional Panel 7: Driver Standings (Floats in when F1 predictor runs) */}
-        {activeTab === "F1 Predictor" && (
-          <mesh position={[5, -2.5, -3.5]} rotation={[-Math.PI / 12, -Math.PI / 6, 0]}>
-            <planeGeometry args={[5.0, 4.0]} />
-            <meshBasicMaterial transparent opacity={0.0} depthWrite={false} />
-            <Html transform distanceFactor={distanceFactor} pointerEvents="auto" center>
-              <div className="w-[90vw] md:w-[500px] shadow-2xl transition-all duration-300">
+        {/* Conditional Driver Standings (Floats next to console panel in space) */}
+        {activeTab === "F1 Predictor" && focusSection === "console" && (
+          <mesh position={[r * Math.cos((2 * Math.PI) / 3) + 2.0, -1.8, r * Math.sin((2 * Math.PI) / 3) - 2.5]}>
+            <planeGeometry args={[4.5, 3.5]} />
+            <meshBasicMaterial color={theme === "dark" ? "#060913" : "#ffffff"} opacity={0.98} transparent />
+            <Html transform distanceFactor={5.5} pointerEvents="auto" center>
+              <div className="w-[90vw] md:w-[480px] shadow-2xl transition-all duration-300">
                 <DriverStandings />
               </div>
             </Html>
@@ -516,9 +482,59 @@ export default function ThreeDWorkspace({
         )}
       </Canvas>
 
-      {/* RECRUITER SPACE TOUR GUIDE ONBOARDING CARD */}
+      {/* RETURN TO ORBIT VIEW HUD LINK */}
+      {focusSection && focusSection !== "home" && (
+        <button
+          onClick={() => setFocusSection("home")}
+          className={`absolute top-20 left-6 z-50 px-4 py-2 rounded-xl border text-[10px] font-bold uppercase tracking-wider transition-all duration-300 flex items-center gap-2 shadow-[0_4px_20px_rgba(0,0,0,0.5)] ${
+            theme === "dark"
+              ? "border-emerald-500/40 bg-slate-950/90 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300"
+              : "border-slate-200 bg-white/95 text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+          }`}
+        >
+          ← Return to Orbit
+        </button>
+      )}
+
+      {/* SPACE HUD COMMAND CONSOLE OVERLAY */}
+      <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-wrap items-center justify-center gap-2.5 px-5 py-2.5 rounded-full border shadow-2xl max-w-[90vw] transition-all duration-300 ${
+        theme === "dark"
+          ? "border-gray-800 bg-slate-950/85 text-white shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+          : "border-slate-200 bg-white/95 text-slate-800 shadow-[0_10px_20px_rgba(15,23,42,0.08)]"
+      }`}>
+        <button
+          onClick={() => setFocusSection("home")}
+          className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider transition-all duration-300 border ${
+            (!focusSection || focusSection === "home") 
+              ? theme === "dark"
+                ? "text-emerald-400 bg-emerald-500/20 border-emerald-500/40" 
+                : "text-blue-600 bg-blue-500/10 border-blue-500/30"
+              : "text-gray-400 border-transparent hover:text-current"
+          }`}
+        >
+          Overview Space
+        </button>
+        <div className="h-4 w-px bg-gray-800 hidden sm:block"></div>
+        {nodes.map((sec) => (
+          <button
+            key={sec.id}
+            onClick={() => setFocusSection(sec.id)}
+            className={`px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider transition-all duration-300 border ${
+              focusSection === sec.id 
+                ? theme === "dark"
+                  ? "text-emerald-400 bg-emerald-500/20 border-emerald-500/40" 
+                  : "text-blue-600 bg-blue-500/10 border-blue-500/30"
+                : "text-gray-400 border-transparent hover:text-current"
+            }`}
+          >
+            {sec.title.split(" ")[0]} {/* Show first word for space constraints */}
+          </button>
+        ))}
+      </div>
+
+      {/* SPACE TOUR GUIDE ONBOARDING OVERLAY */}
       {!dismissTour && (
-        <div className={`absolute top-20 right-6 z-50 w-[310px] max-w-[calc(100vw-3rem)] rounded-2xl border p-5 shadow-[0_15px_40px_rgba(0,0,0,0.6)] backdrop-blur-md text-white transition-all duration-500 ${
+        <div className={`absolute top-20 right-6 z-50 w-[300px] max-w-[calc(100vw-3rem)] rounded-2xl border p-5 shadow-[0_15px_40px_rgba(0,0,0,0.6)] backdrop-blur-md text-white transition-all duration-500 ${
           theme === "dark" 
             ? "border-emerald-500/30 bg-slate-950/92" 
             : "border-slate-200 bg-white/95 text-slate-800"
@@ -526,7 +542,7 @@ export default function ThreeDWorkspace({
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <span className={`w-2 h-2 rounded-full ${theme === "dark" ? "bg-emerald-400 animate-pulse" : "bg-blue-500 animate-pulse"}`}></span>
-              <h3 className={`text-xs font-bold uppercase tracking-wider ${theme === "dark" ? "text-emerald-400" : "text-blue-600"}`}>Recruiter Tour Guide</h3>
+              <h3 className={`text-xs font-bold uppercase tracking-wider ${theme === "dark" ? "text-emerald-400" : "text-blue-600"}`}>Orbital Telemetry Scan</h3>
             </div>
             <button 
               onClick={() => setDismissTour(true)}
@@ -535,21 +551,17 @@ export default function ThreeDWorkspace({
               ✕
             </button>
           </div>
-          <p className={`text-xs leading-relaxed mb-4 ${theme === "dark" ? "text-gray-300" : "text-slate-600"}`}>
-            Welcome to Bharat's interactive 3D control room! Here is how to browse his credentials efficiently:
+          <p className={`text-[11px] leading-relaxed mb-4 ${theme === "dark" ? "text-gray-300" : "text-slate-600"}`}>
+            Inspect Bharat's tech deployments connected globally around this 3D sphere:
           </p>
           <div className="space-y-3 mb-4">
             <div className="flex items-start gap-2 text-[10px] leading-normal">
-              <span className={`font-bold ${theme === "dark" ? "text-emerald-400" : "text-blue-600"}`}>1. Click Tags:</span>
-              <span className={theme === "dark" ? "text-gray-400" : "text-slate-500"}>Select any floating label above to automatically align and zoom onto that screen.</span>
+              <span className={`font-bold ${theme === "dark" ? "text-emerald-400" : "text-blue-600"}`}>1. Orbiting Satellites:</span>
+              <span className={theme === "dark" ? "text-gray-400" : "text-slate-500"}>Click any orbiting satellite panel or text tag to zoom into that workspace module.</span>
             </div>
             <div className="flex items-start gap-2 text-[10px] leading-normal">
-              <span className={`font-bold ${theme === "dark" ? "text-emerald-400" : "text-blue-600"}`}>2. 3D Parallax:</span>
-              <span className={theme === "dark" ? "text-gray-400" : "text-slate-500"}>Drag the screen when zoomed in to tilt the panel for a satisfying 3D depth effect.</span>
-            </div>
-            <div className="flex items-start gap-2 text-[10px] leading-normal">
-              <span className={`font-bold ${theme === "dark" ? "text-emerald-400" : "text-blue-600"}`}>3. Interactive:</span>
-              <span className={theme === "dark" ? "text-gray-400" : "text-slate-500"}>All screens are live. Scroll CV sections or chat with the agent directly in 3D.</span>
+              <span className={`font-bold ${theme === "dark" ? "text-emerald-400" : "text-blue-600"}`}>2. Crisp Display:</span>
+              <span className={theme === "dark" ? "text-gray-400" : "text-slate-500"}>Focused panels align perfectly flat and lock rotation, ensuring crisp text readability.</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -561,7 +573,7 @@ export default function ThreeDWorkspace({
                   : "bg-blue-600 text-white hover:bg-blue-500"
               }`}
             >
-              Start Tour
+              Initiate Space Scan
             </button>
             <button
               onClick={() => setDismissTour(true)}
@@ -571,54 +583,11 @@ export default function ThreeDWorkspace({
                   : "border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50"
               }`}
             >
-              Explore
+              Skip Scan
             </button>
           </div>
         </div>
       )}
-
-      {/* FLOATING 3D HUD CONTROLLER OVERLAY */}
-      <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-wrap items-center justify-center gap-2.5 px-5 py-2.5 rounded-full border shadow-2xl max-w-[90vw] transition-all duration-300 ${
-        theme === "dark"
-          ? "border-gray-800 bg-slate-950/85 text-white shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
-          : "border-slate-200 bg-white/95 text-slate-800 shadow-[0_10px_20px_rgba(15,23,42,0.08)]"
-      }`}>
-        <button
-          onClick={() => setFocusSection("home")}
-          className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-300 border ${
-            (!focusSection || focusSection === "home") 
-              ? theme === "dark"
-                ? "text-emerald-400 bg-emerald-500/20 border-emerald-500/40" 
-                : "text-blue-600 bg-blue-500/10 border-blue-500/30"
-              : "text-gray-400 border-transparent hover:text-current"
-          }`}
-        >
-          Reset Space
-        </button>
-        <div className="h-4 w-px bg-gray-800 hidden sm:block"></div>
-        {[
-          { label: "About", id: "about" },
-          { label: "Experience", id: "experience" },
-          { label: "Console", id: "console" },
-          { label: "Projects", id: "projects" },
-          { label: "Skills", id: "skills" },
-          { label: "Blog", id: "blog" }
-        ].map((sec) => (
-          <button
-            key={sec.id}
-            onClick={() => setFocusSection(sec.id)}
-            className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-300 border ${
-              focusSection === sec.id 
-                ? theme === "dark"
-                  ? "text-emerald-400 bg-emerald-500/20 border-emerald-500/40" 
-                  : "text-blue-600 bg-blue-500/10 border-blue-500/30"
-                : "text-gray-400 border-transparent hover:text-current"
-            }`}
-          >
-            {sec.label}
-          </button>
-        ))}
-      </div>
     </div>
   );
 }
