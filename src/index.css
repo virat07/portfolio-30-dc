@@ -94,3 +94,12 @@
   background: rgba(71, 85, 105, 0.3);
 }
 
+/* Hide scrollbars on elements */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+

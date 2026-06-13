@@ -11,12 +11,15 @@ import ChatButton from "./components/ChatComponent";
 import AgentConsole from "./components/AgentConsole";
 import DriverStandings from "./components/DriverStandings";
 import ThreeDCanvas from "./components/ThreeDCanvas";
+import ThreeDWorkspace from "./components/ThreeDWorkspace";
 
 export default function App() {
   const profilePicUrl = "/027A1497.jpeg";
   const [theme, setTheme] = useState("dark");
   const [f1Complete, setF1Complete] = useState(false);
   const [activeTab, setActiveTab] = useState("Digital Twin");
+  const [viewMode, setViewMode] = useState("2d"); // "2d" or "3d"
+  const [focusSection, setFocusSection] = useState(null);
 
   const toggleTheme = () => {
     const nextTheme = theme === "dark" ? "light" : "dark";
@@ -62,58 +65,72 @@ export default function App() {
         }}
         theme={theme}
         toggleTheme={toggleTheme}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        focusSection={focusSection}
+        setFocusSection={setFocusSection}
       />
 
       {/* Main Content Dashboard */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
-        {/* Two-Column Split Console Grid Layout */}
-        <div ref={typingHomeRef} className="lg:grid lg:grid-cols-12 lg:gap-10 items-start">
-          {/* Left Column: CV Track */}
-          <div className="lg:col-span-7 flex flex-col space-y-12">
-            <div ref={aboutUsRef}>
-              <AboutUs profilePicUrl={profilePicUrl} theme={theme} />
+      {viewMode === "2d" ? (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+          {/* Two-Column Split Console Grid Layout */}
+          <div ref={typingHomeRef} className="lg:grid lg:grid-cols-12 lg:gap-10 items-start">
+            {/* Left Column: CV Track */}
+            <div className="lg:col-span-7 flex flex-col space-y-12">
+              <div ref={aboutUsRef}>
+                <AboutUs profilePicUrl={profilePicUrl} theme={theme} />
+              </div>
+              <div ref={experienceRef}>
+                <WorkExperience theme={theme} />
+              </div>
+              <div ref={projectsRef}>
+                <ProjectsComponent theme={theme} />
+              </div>
+              <div ref={skillsRef}>
+                <SkillsComponent theme={theme} />
+              </div>
             </div>
-            <div ref={experienceRef}>
-              <WorkExperience theme={theme} />
-            </div>
-            <div ref={projectsRef}>
-              <ProjectsComponent theme={theme} />
-            </div>
-            <div ref={skillsRef}>
-              <SkillsComponent theme={theme} />
+
+            {/* Right Column: AI Console Simulator */}
+            <div className="lg:col-span-5 lg:sticky lg:top-24 mt-12 lg:mt-0">
+              <div className="hidden lg:block mb-6">
+                <ThreeDCanvas activeTab={activeTab} theme={theme} />
+              </div>
+              <AgentConsole theme={theme} onF1Complete={setF1Complete} onTabChange={setActiveTab} />
+              <AnimatePresence>
+                {f1Complete && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0, y: 20 }}
+                    animate={{ opacity: 1, height: "auto", y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: 20 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    className="overflow-hidden"
+                  >
+                    <DriverStandings />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 
-          {/* Right Column: AI Console Simulator */}
-          <div className="lg:col-span-5 lg:sticky lg:top-24 mt-12 lg:mt-0">
-            <div className="hidden lg:block mb-6">
-              <ThreeDCanvas activeTab={activeTab} theme={theme} />
-            </div>
-            <AgentConsole theme={theme} onF1Complete={setF1Complete} onTabChange={setActiveTab} />
-            <AnimatePresence>
-              {f1Complete && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0, y: 20 }}
-                  animate={{ opacity: 1, height: "auto", y: 0 }}
-                  exit={{ opacity: 0, height: 0, y: 20 }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
-                  className="overflow-hidden"
-                >
-                  <DriverStandings />
-                </motion.div>
-              )}
-            </AnimatePresence>
+          {/* Publications / Blog Section */}
+          <div ref={mediumNotionRef} className="mt-20">
+            <MediumNotionComponent theme={theme} />
           </div>
         </div>
+      ) : (
+        <ThreeDWorkspace
+          theme={theme}
+          focusSection={focusSection}
+          setFocusSection={setFocusSection}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
+      )}
 
-        {/* Publications / Blog Section */}
-        <div ref={mediumNotionRef} className="mt-20">
-          <MediumNotionComponent theme={theme} />
-        </div>
-      </div>
-
-      <FooterComponent theme={theme} />
-      <ChatButton />
+      {viewMode === "2d" && <FooterComponent theme={theme} />}
+      {viewMode === "2d" && <ChatButton />}
     </div>
   );
 }
