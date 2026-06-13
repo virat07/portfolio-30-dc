@@ -10,11 +10,13 @@ import MediumNotionComponent from "./components/MediumNotionComponent";
 import ChatButton from "./components/ChatComponent";
 import AgentConsole from "./components/AgentConsole";
 import DriverStandings from "./components/DriverStandings";
+import ThreeDCanvas from "./components/ThreeDCanvas";
 
 export default function App() {
   const profilePicUrl = "/027A1497.jpeg";
   const [theme, setTheme] = useState("dark");
   const [f1Complete, setF1Complete] = useState(false);
+  const [activeTab, setActiveTab] = useState("Digital Twin");
 
   const toggleTheme = () => {
     const nextTheme = theme === "dark" ? "light" : "dark";
@@ -84,7 +86,10 @@ export default function App() {
 
           {/* Right Column: AI Console Simulator */}
           <div className="lg:col-span-5 lg:sticky lg:top-24 mt-12 lg:mt-0">
-            <AgentConsole theme={theme} onF1Complete={setF1Complete} />
+            <div className="hidden lg:block mb-6">
+              <ThreeDCanvas activeTab={activeTab} theme={theme} />
+            </div>
+            <AgentConsole theme={theme} onF1Complete={setF1Complete} onTabChange={setActiveTab} />
             <AnimatePresence>
               {f1Complete && (
                 <motion.div

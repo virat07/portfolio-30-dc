@@ -2,8 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiPlay, FiCpu, FiMessageSquare, FiTrendingUp } from "react-icons/fi";
 
-const AgentConsole = ({ theme = "light", onF1Complete }) => {
+const AgentConsole = ({ theme = "light", onF1Complete, onTabChange }) => {
   const [activeTab, setActiveTab] = useState("Digital Twin");
+
+  useEffect(() => {
+    if (onTabChange) onTabChange(activeTab);
+  }, [activeTab, onTabChange]);
   
   // F1 Simulator States
   const [f1Simulating, setF1Simulating] = useState(false);
