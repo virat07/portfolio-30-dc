@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const MediumNotionComponent = ({ theme = "light" }) => {
+const MediumNotionComponent = ({ theme = "light", isDrawer = false }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -45,6 +45,55 @@ const MediumNotionComponent = ({ theme = "light" }) => {
         }`}
       >
         Error: {error}
+      </div>
+    );
+  }
+
+  if (isDrawer) {
+    return (
+      <div className="w-full transition-colors duration-300">
+        <div className="flex flex-col gap-5">
+          {posts.map((post) => (
+            <a
+              key={post.guid}
+              href={post.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`rounded-xl border p-4 flex flex-col sm:flex-row gap-4 transition-all duration-300 hover:scale-[1.02] ${
+                theme === "dark" 
+                  ? "bg-slate-900/40 border-slate-800/80 hover:border-emerald-500/40 text-white" 
+                  : "bg-white border-slate-200 hover:border-blue-500/40 text-slate-800"
+              }`}
+            >
+              {post.thumbnail && (
+                <img
+                  src={post.thumbnail}
+                  alt={post.title}
+                  className="w-full sm:w-24 h-20 object-cover rounded-lg flex-shrink-0"
+                />
+              )}
+              <div className="flex flex-col flex-1 justify-between">
+                <div>
+                  <h3 className={`text-xs font-bold mb-1 line-clamp-2 transition-colors duration-300 hover:text-emerald-400 ${
+                    theme === "dark" ? "text-white" : "text-slate-900"
+                  }`}>
+                    {post.title}
+                  </h3>
+                  <p className={`text-[10px] leading-relaxed line-clamp-2 ${
+                    theme === "dark" ? "text-gray-400" : "text-slate-500"
+                  }`}>
+                    {post.description.replace(/<[^>]+>/g, "")}
+                  </p>
+                </div>
+                <span className={`text-[9px] font-bold mt-2 flex items-center gap-1 ${
+                  theme === "dark" ? "text-emerald-400" : "text-blue-600"
+                }`}>
+                  Read Article &rarr;
+                </span>
+              </div>
+            </a>
+          ))}
+        </div>
       </div>
     );
   }

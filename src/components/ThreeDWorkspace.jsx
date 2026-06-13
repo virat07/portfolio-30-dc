@@ -368,52 +368,54 @@ function SatelliteNode({ id, title, active, onClick, position, theme }) {
   };
 
   return (
-    <group 
-      position={position} 
-      ref={groupRef}
-      onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
-      onPointerOut={() => setHovered(false)}
-    >
-      <group 
-        onPointerDown={handlePointerDown} 
-        onPointerUp={handlePointerUp} 
+    <group position={position} ref={groupRef}>
+      {/* Visual meshes - no pointer events to prevent conflicts */}
+      {/* Pulsing Core Sphere */}
+      <mesh ref={coreRef}>
+        <sphereGeometry args={[0.16, 16, 16]} />
+        <meshBasicMaterial 
+          color={active 
+            ? (theme === "dark" ? "#34d399" : "#2563eb") 
+            : hovered 
+              ? (theme === "dark" ? "#10b981" : "#3b82f6") 
+              : (theme === "dark" ? "#065f46" : "#93c5fd")
+          } 
+        />
+      </mesh>
+
+      {/* Diagonal Rotating Panel Ring */}
+      <mesh ref={ringRef} rotation={[Math.PI / 4, Math.PI / 4, 0]}>
+        <ringGeometry args={[0.24, 0.28, 32]} />
+        <meshBasicMaterial 
+          color={theme === "dark" ? "#10b981" : "#3b82f6"} 
+          side={THREE.DoubleSide} 
+          transparent 
+          opacity={0.65} 
+        />
+      </mesh>
+
+      {/* Outer Bounding Wireframe Cube */}
+      <mesh>
+        <boxGeometry args={[0.42, 0.42, 0.42]} />
+        <meshBasicMaterial 
+          color={theme === "dark" ? "#10b981" : "#3b82f6"} 
+          wireframe 
+          transparent 
+          opacity={active || hovered ? 0.35 : 0.12} 
+        />
+      </mesh>
+
+      {/* Invisible Interactive Hitbox (Radius 0.75 for easy hover & click detection) */}
+      <mesh
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
+        onPointerOut={() => setHovered(false)}
         className="cursor-pointer"
       >
-        {/* Pulsing Core Sphere */}
-        <mesh ref={coreRef}>
-          <sphereGeometry args={[0.16, 16, 16]} />
-          <meshBasicMaterial 
-            color={active 
-              ? (theme === "dark" ? "#34d399" : "#2563eb") 
-              : hovered 
-                ? (theme === "dark" ? "#10b981" : "#3b82f6") 
-                : (theme === "dark" ? "#065f46" : "#93c5fd")
-            } 
-          />
-        </mesh>
-
-        {/* Diagonal Rotating Panel Ring */}
-        <mesh ref={ringRef} rotation={[Math.PI / 4, Math.PI / 4, 0]}>
-          <ringGeometry args={[0.24, 0.28, 32]} />
-          <meshBasicMaterial 
-            color={theme === "dark" ? "#10b981" : "#3b82f6"} 
-            side={THREE.DoubleSide} 
-            transparent 
-            opacity={0.65} 
-          />
-        </mesh>
-
-        {/* Outer Bounding Wireframe Cube */}
-        <mesh>
-          <boxGeometry args={[0.42, 0.42, 0.42]} />
-          <meshBasicMaterial 
-            color={theme === "dark" ? "#10b981" : "#3b82f6"} 
-            wireframe 
-            transparent 
-            opacity={active || hovered ? 0.35 : 0.12} 
-          />
-        </mesh>
-      </group>
+        <sphereGeometry args={[0.75, 16, 16]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
 
       {/* Floating HTML Text Label */}
       <Html distanceFactor={6.5} center pointerEvents="none">
@@ -533,7 +535,19 @@ export default function ThreeDWorkspace({
 }) {
   const controlsRef = useRef();
   const [isMobile, setIsMobile] = useState(false);
-  const [dismissTour, setDismissTour] = useState(false);
+  const [dismissTour, setDismissTour] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("dismissSpaceTour") === "true";
+    }
+    return false;
+  });
+
+  const handleDismissTour = () => {
+    setDismissTour(true);
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("dismissSpaceTour", "true");
+    }
+  };
 
   // SSR-safe check for window resize
   useEffect(() => {
@@ -549,6 +563,13 @@ export default function ThreeDWorkspace({
   useEffect(() => {
     if (setFocusSection) setFocusSection("home");
   }, [setFocusSection]);
+
+  // Dismiss onboarding tour automatically when user selects a node
+  useEffect(() => {
+    if (focusSection && focusSection !== "home") {
+      handleDismissTour();
+    }
+  }, [focusSection]);
 
   const r = 5.2;
 
@@ -773,7 +794,7 @@ export default function ThreeDWorkspace({
               )}
               {focusSection === "projects" && <ProjectsComponent theme={theme} />}
               {focusSection === "skills" && <SkillsComponent theme={theme} />}
-              {focusSection === "blog" && <MediumNotionComponent theme={theme} />}
+              {focusSection === "blog" && <MediumNotionComponent theme={theme} isDrawer={true} />}
             </div>
 
             {/* Diagnostics & Navigation Panel Footer */}
@@ -887,7 +908,7 @@ export default function ThreeDWorkspace({
               <h3 className={`text-xs font-bold uppercase tracking-wider ${theme === "dark" ? "text-emerald-400" : "text-blue-600"}`}>System Initialized</h3>
             </div>
             <button 
-              onClick={() => setDismissTour(true)}
+              onClick={handleDismissTour}
               className="text-gray-400 hover:text-gray-200 text-xs transition-colors"
             >
               ✕
@@ -920,7 +941,7 @@ export default function ThreeDWorkspace({
               Initiate Space Scan
             </button>
             <button
-              onClick={() => setDismissTour(true)}
+              onClick={handleDismissTour}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300 border ${
                 theme === "dark"
                   ? "border-gray-800 text-gray-400 hover:text-white hover:bg-gray-900"
