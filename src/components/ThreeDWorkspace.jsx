@@ -211,8 +211,9 @@ function OrbitRing({ radius, theme }) {
 }
 
 // Orbital Glass Card Node (represents portfolio sections orbiting Earth)
-function GlassCardNode({ id, title, active, onClick, position, theme }) {
+function GlassCardNode({ id, title, active, onClick, position, theme, setActiveTab }) {
   const meshRef = useRef();
+  const pointerDownPos = useRef({ x: 0, y: 0 });
 
   // Face outwards from center globe
   useEffect(() => {
@@ -221,6 +222,21 @@ function GlassCardNode({ id, title, active, onClick, position, theme }) {
       meshRef.current.lookAt(x * 2, y, z * 2);
     }
   }, [position]);
+
+  const handlePointerDown = (e) => {
+    e.stopPropagation();
+    pointerDownPos.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const handlePointerUp = (e) => {
+    e.stopPropagation();
+    const moveX = Math.abs(e.clientX - pointerDownPos.current.x);
+    const moveY = Math.abs(e.clientY - pointerDownPos.current.y);
+    // Only click if it wasn't a drag operation
+    if (moveX < 5 && moveY < 5) {
+      onClick();
+    }
+  };
 
   return (
     <group position={position} ref={meshRef}>
@@ -239,7 +255,7 @@ function GlassCardNode({ id, title, active, onClick, position, theme }) {
             <div className="w-[90vw] md:w-[600px] max-h-[70vh] md:max-h-[550px] overflow-y-auto select-none no-scrollbar glass-panel-3d p-1.5 transition-all duration-300">
               {id === "about" && <AboutUs profilePicUrl="/027A1497.jpeg" theme={theme} />}
               {id === "experience" && <WorkExperience theme={theme} />}
-              {id === "console" && <AgentConsole theme={theme} onF1Complete={() => {}} onTabChange={() => {}} />}
+              {id === "console" && <AgentConsole theme={theme} onF1Complete={() => {}} onTabChange={setActiveTab} />}
               {id === "projects" && <ProjectsComponent theme={theme} />}
               {id === "skills" && <SkillsComponent theme={theme} />}
               {id === "blog" && <MediumNotionComponent theme={theme} />}
@@ -248,7 +264,11 @@ function GlassCardNode({ id, title, active, onClick, position, theme }) {
         </group>
       ) : (
         /* Inactive orbital satellite card mesh */
-        <mesh onClick={onClick} className="cursor-pointer">
+        <mesh 
+          onPointerDown={handlePointerDown} 
+          onPointerUp={handlePointerUp} 
+          className="cursor-pointer"
+        >
           <planeGeometry args={[4.4, 3.0]} />
           <meshPhysicalMaterial
             roughness={0.1}
@@ -288,6 +308,14 @@ function GlassCardNode({ id, title, active, onClick, position, theme }) {
 
 // Camera flight rigging component
 function CameraRig({ focusSection, controlsRef, isMobile }) {
+  const prevSection = useRef(focusSection);
+  const isTransitioningRef = useRef(true);
+
+  if (prevSection.current !== focusSection) {
+    prevSection.current = focusSection;
+    isTransitioningRef.current = true;
+  }
+
   useFrame((state) => {
     let targetPos = isMobile ? [0, 2.5, 12.0] : [0, 1.8, 10.0];
     let targetLook = [0, 0.5, 0];
@@ -309,27 +337,51 @@ function CameraRig({ focusSection, controlsRef, isMobile }) {
         const x = r * Math.cos(sec.angle);
         const z = r * Math.sin(sec.angle);
         const y = sec.height;
-        // Glide camera directly parallel to the card face (orthogonal)
         targetPos = [x + d * Math.cos(sec.angle), y, z + d * Math.sin(sec.angle)];
         targetLook = [x, y, z];
       }
     } else {
-      // Wide overview camera angle
       targetPos = isMobile ? [0, 2.5, 11.5] : [0, 1.8, 9.5];
       targetLook = [0, 0.5, 0];
     }
 
-    // Camera positioning lerp
-    state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, targetPos[0], 0.08);
-    state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetPos[1], 0.08);
-    state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, targetPos[2], 0.08);
+    if (isTransitioningRef.current) {
+      // Lerp camera position
+      state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, targetPos[0], 0.08);
+      state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetPos[1], 0.08);
+      state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, targetPos[2], 0.08);
 
-    // OrbitControls center focus target lerp
-    if (controlsRef.current) {
-      controlsRef.current.target.x = THREE.MathUtils.lerp(controlsRef.current.target.x, targetLook[0], 0.08);
-      controlsRef.current.target.y = THREE.MathUtils.lerp(controlsRef.current.target.y, targetLook[1], 0.08);
-      controlsRef.current.target.z = THREE.MathUtils.lerp(controlsRef.current.target.z, targetLook[2], 0.08);
-      controlsRef.current.update();
+      // Lerp OrbitControls target
+      if (controlsRef.current) {
+        controlsRef.current.target.x = THREE.MathUtils.lerp(controlsRef.current.target.x, targetLook[0], 0.08);
+        controlsRef.current.target.y = THREE.MathUtils.lerp(controlsRef.current.target.y, targetLook[1], 0.08);
+        controlsRef.current.target.z = THREE.MathUtils.lerp(controlsRef.current.target.z, targetLook[2], 0.08);
+        controlsRef.current.update();
+      }
+
+      // Check distance to stop transition and hand over controls
+      const dist = Math.sqrt(
+        Math.pow(state.camera.position.x - targetPos[0], 2) +
+        Math.pow(state.camera.position.y - targetPos[1], 2) +
+        Math.pow(state.camera.position.z - targetPos[2], 2)
+      );
+      if (dist < 0.04) {
+        isTransitioningRef.current = false;
+      }
+    } else {
+      // If focused on a card, hold camera in place so user is aligned orthogonally
+      // But in Overview "home" mode, DO NOT override coordinates so they can drag freely!
+      if (focusSection && focusSection !== "home") {
+        state.camera.position.x = targetPos[0];
+        state.camera.position.y = targetPos[1];
+        state.camera.position.z = targetPos[2];
+        if (controlsRef.current) {
+          controlsRef.current.target.x = targetLook[0];
+          controlsRef.current.target.y = targetLook[1];
+          controlsRef.current.target.z = targetLook[2];
+          controlsRef.current.update();
+        }
+      }
     }
   });
   return null;
@@ -343,6 +395,7 @@ export default function ThreeDWorkspace({
   setActiveTab
 }) {
   const controlsRef = useRef();
+  const standingsRef = useRef();
   const [isMobile, setIsMobile] = useState(false);
   const [dismissTour, setDismissTour] = useState(false);
 
@@ -360,6 +413,21 @@ export default function ThreeDWorkspace({
   useEffect(() => {
     if (setFocusSection) setFocusSection("home");
   }, [setFocusSection]);
+
+  // Standing panel positioning and lookAt orientation
+  const r = 5.2;
+  const standingsPos = useMemo(() => [
+    r * Math.cos((2 * Math.PI) / 3) + 2.4, 
+    -1.2, 
+    r * Math.sin((2 * Math.PI) / 3) - 2.2
+  ], [r]);
+
+  useEffect(() => {
+    if (standingsRef.current) {
+      const [x, y, z] = standingsPos;
+      standingsRef.current.lookAt(x * 2, y, z * 2);
+    }
+  }, [standingsPos]);
 
   // Calculate dynamic wiggling rotation locks based on focused section
   const getLimits = () => {
@@ -402,7 +470,6 @@ export default function ThreeDWorkspace({
   const limits = getLimits();
 
   // Nodes configuration
-  const r = 5.2;
   const nodes = [
     { id: "about", title: "About Me", angle: 0, height: 0.6 },
     { id: "experience", title: "Work Experience", angle: Math.PI / 3, height: -0.8 },
@@ -464,13 +531,14 @@ export default function ThreeDWorkspace({
               onClick={() => setFocusSection(node.id)}
               position={[x, node.height, z]}
               theme={theme}
+              setActiveTab={setActiveTab}
             />
           );
         })}
 
         {/* Conditional Driver Standings (Floats next to console panel in space) */}
         {activeTab === "F1 Predictor" && focusSection === "console" && (
-          <mesh position={[r * Math.cos((2 * Math.PI) / 3) + 2.0, -1.8, r * Math.sin((2 * Math.PI) / 3) - 2.5]}>
+          <mesh ref={standingsRef} position={standingsPos}>
             <planeGeometry args={[4.5, 3.5]} />
             <meshBasicMaterial color={theme === "dark" ? "#060913" : "#ffffff"} opacity={0.98} transparent />
             <Html transform distanceFactor={5.5} pointerEvents="auto" center>
