@@ -354,15 +354,19 @@ function SatelliteNode({ id, title, active, onClick, position, theme }) {
 
   const handlePointerDown = (e) => {
     e.stopPropagation();
-    pointerDownPos.current = { x: e.clientX, y: e.clientY };
+    const x = e.nativeEvent?.clientX ?? e.clientX ?? 0;
+    const y = e.nativeEvent?.clientY ?? e.clientY ?? 0;
+    pointerDownPos.current = { x, y };
   };
 
   const handlePointerUp = (e) => {
     e.stopPropagation();
-    const moveX = Math.abs(e.clientX - pointerDownPos.current.x);
-    const moveY = Math.abs(e.clientY - pointerDownPos.current.y);
-    // Only click if it wasn't a drag operation
-    if (moveX < 5 && moveY < 5) {
+    const x = e.nativeEvent?.clientX ?? e.clientX ?? 0;
+    const y = e.nativeEvent?.clientY ?? e.clientY ?? 0;
+    const moveX = Math.abs(x - pointerDownPos.current.x);
+    const moveY = Math.abs(y - pointerDownPos.current.y);
+    // Allow up to 10 pixels of motion to support imperfect mouse clicks and mobile touch tap adjustments
+    if (moveX < 10 && moveY < 10) {
       onClick();
     }
   };
