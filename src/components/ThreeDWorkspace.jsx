@@ -535,6 +535,7 @@ export default function ThreeDWorkspace({
 }) {
   const controlsRef = useRef();
   const [isMobile, setIsMobile] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [dismissTour, setDismissTour] = useState(() => {
     if (typeof window !== "undefined") {
       return sessionStorage.getItem("dismissSpaceTour") === "true";
@@ -568,6 +569,13 @@ export default function ThreeDWorkspace({
   useEffect(() => {
     if (focusSection && focusSection !== "home") {
       handleDismissTour();
+    }
+  }, [focusSection]);
+
+  // Sync isExpanded drawer state with focusSection changes
+  useEffect(() => {
+    if (focusSection === "home" || !focusSection) {
+      setIsExpanded(false);
     }
   }, [focusSection]);
 
@@ -640,23 +648,84 @@ export default function ThreeDWorkspace({
     }
   };
 
+  // Mobile Carousel cards mapping
+  const carouselCards = useMemo(() => [
+    {
+      id: "home",
+      title: "Space Control Console",
+      tag: "OVERVIEW MODE",
+      summary: "Bharat's global infrastructure scanner. Cycle nodes to scan details."
+    },
+    {
+      id: "about",
+      title: "About Me",
+      tag: "SATELLITE NODE-01",
+      summary: "Master's in CS, 6+ years building high-impact React systems and agentic workflows."
+    },
+    {
+      id: "experience",
+      title: "Work Experience",
+      tag: "SATELLITE NODE-02",
+      summary: "Engineering highlights: leading frontend teams, optimizing Core Web Vitals, and Figma MCPs."
+    },
+    {
+      id: "console",
+      title: "Agent Console",
+      tag: "SATELLITE NODE-03",
+      summary: "Simulate live stock alerts, telemetry log scrapers, and F1 Predictor point scoring."
+    },
+    {
+      id: "projects",
+      title: "Featured Projects",
+      tag: "SATELLITE NODE-04",
+      summary: "Interactive portfolio of Web3 exchanges, React Dashboards, and UI libraries."
+    },
+    {
+      id: "skills",
+      title: "Skills Constellation",
+      tag: "SATELLITE NODE-05",
+      summary: "Expertise in React, Three.js, Tailwind, Node, Python, and system architecture."
+    },
+    {
+      id: "blog",
+      title: "Publications Blog",
+      tag: "SATELLITE NODE-06",
+      summary: "Technical articles on Medium and Notion outlining developer insights."
+    }
+  ], []);
+
+  const nodeIds = useMemo(() => ["home", "about", "experience", "console", "projects", "skills", "blog"], []);
+  const activeIndex = useMemo(() => {
+    const idx = nodeIds.indexOf(focusSection);
+    return idx !== -1 ? idx : 0;
+  }, [focusSection, nodeIds]);
+
+  const handleNextMobile = () => {
+    const nextIdx = (activeIndex + 1) % nodeIds.length;
+    setFocusSection(nodeIds[nextIdx]);
+  };
+
+  const handlePrevMobile = () => {
+    const prevIdx = (activeIndex - 1 + nodeIds.length) % nodeIds.length;
+    setFocusSection(nodeIds[prevIdx]);
+  };
+
   return (
     <div className={`fixed inset-0 z-40 flex flex-col transition-colors duration-300 pt-16 ${
       theme === "dark" ? "bg-gray-950 text-white" : "bg-slate-50 text-slate-800"
     }`}>
-      {/* 3D WebGL Canvas Viewport */}
-      <div className={`${isMobile ? "h-[32vh] w-full relative shrink-0" : "absolute inset-0 pt-16"}`}>
+      {/* 3D WebGL Canvas Viewport - Absolute full-screen background on mobile & desktop */}
+      <div className="absolute inset-0 pt-16 z-0">
         <Canvas camera={{ position: [0, 2, 11], fov: 55 }}>
           {/* Lights */}
           <ambientLight intensity={theme === "dark" ? 0.75 : 0.95} />
           <pointLight position={[10, 10, 10]} intensity={1.3} />
           <directionalLight position={[-5, 5, 5]} intensity={0.9} />
 
-          {/* Orbit Controls with dynamic wiggling constraints */}
+          {/* Orbit Controls (Disabled on mobile to let bottom card control camera cleanly) */}
           <OrbitControls
             ref={controlsRef}
-            enableZoom={!isMobile}
-            enableRotate={isMobile ? (focusSection === "home" || !focusSection) : true}
+            enabled={!isMobile}
             maxDistance={18}
             minDistance={2.5}
             enablePan={false}
@@ -726,146 +795,202 @@ export default function ThreeDWorkspace({
         </Canvas>
       </div>
 
-      {/* 2D HUD content - Split Screen for mobile, absolute drawer/overlays for desktop */}
+      {/* 2D HUD content - Carousel for mobile, absolute drawer/overlays for desktop */}
       {isMobile ? (
-        /* Mobile split screen details pane */
-        <div className={`flex-1 flex flex-col justify-between overflow-hidden border-t rounded-t-3xl backdrop-blur-xl z-10 transition-colors duration-300 ${
-          theme === "dark"
-            ? "border-emerald-500/20 bg-slate-950/80 text-white"
-            : "border-slate-200 bg-white/95 text-slate-800"
-        }`}>
-          {/* Header */}
-          <div className={`px-5 py-3.5 flex items-center justify-between border-b ${
-            theme === "dark" ? "border-slate-900 bg-slate-950/40" : "border-slate-100 bg-slate-50/50"
-          }`}>
-            <div className="flex items-center gap-2">
-              <span className={`w-2.5 h-2.5 rounded-full ${
-                theme === "dark" ? "bg-emerald-400 animate-pulse" : "bg-blue-600 animate-pulse"
-              }`} />
-              <div className="flex flex-col">
-                <span className={`text-[8px] font-mono tracking-widest ${
-                  theme === "dark" ? "text-emerald-400/80" : "text-blue-600/80"
-                }`}>
-                  {focusSection && focusSection !== "home" ? `DATA LINK ACTIVE // SEC: ${focusSection.toUpperCase()}_NODE` : "GLOBAL TELEMETRY LINK"}
-                </span>
-                <h2 className="text-xs font-black uppercase tracking-wider font-mono">
-                  {focusSection && focusSection !== "home" 
-                    ? nodes.find((n) => n.id === focusSection)?.title 
-                    : "Orbital Console Status"}
-                </h2>
+        <>
+          {/* Mobile HUD Carousel Card (Floating at the bottom, full screen Canvas background behind) */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[92vw] max-w-[400px] z-30 flex flex-col gap-2.5">
+            <div className={`p-4 rounded-2xl border backdrop-blur-xl transition-all duration-300 shadow-2xl ${
+              theme === "dark"
+                ? "border-emerald-500/25 bg-slate-950/85 text-white shadow-[0_10px_35px_rgba(16,185,129,0.15)]"
+                : "border-slate-200 bg-white/95 text-slate-800 shadow-[0_10px_25px_rgba(15,23,42,0.08)]"
+            }`}>
+              {/* Telemetry Indicator */}
+              <div className={`flex items-center justify-between w-full text-[8px] font-mono tracking-widest select-none pb-1.5 border-b border-gray-800/40 ${
+                theme === "dark" ? "text-emerald-500/70" : "text-blue-500/70"
+              }`}>
+                <span>{carouselCards[activeIndex].tag}</span>
+                <span>[{activeIndex + 1} / 7]</span>
               </div>
-            </div>
-            {focusSection && focusSection !== "home" && (
-              <button
-                onClick={() => setFocusSection("home")}
-                className={`px-3 py-1 rounded-xl text-[10px] font-bold border transition-colors ${
-                  theme === "dark"
-                    ? "border-slate-800 bg-slate-900 text-emerald-400 hover:text-white"
-                    : "border-slate-200 bg-slate-100 text-blue-600 hover:text-slate-900"
-                }`}
-              >
-                ✕ Close
-              </button>
-            )}
-          </div>
 
-          {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto px-5 py-4 custom-scrollbar select-text">
-            {focusSection && focusSection !== "home" ? (
-              <>
-                {focusSection === "about" && <AboutUs profilePicUrl="/027A1497.jpeg" theme={theme} />}
-                {focusSection === "experience" && <WorkExperience theme={theme} />}
-                {focusSection === "console" && (
-                  <div className="space-y-4">
-                    <AgentConsole theme={theme} onF1Complete={() => {}} onTabChange={setActiveTab} />
-                    {activeTab === "F1 Predictor" && (
-                      <div className={`mt-4 border-t border-dashed pt-4 ${
-                        theme === "dark" ? "border-slate-800" : "border-slate-200"
-                      }`}>
-                        <DriverStandings />
-                      </div>
-                    )}
-                  </div>
-                )}
-                {focusSection === "projects" && <ProjectsComponent theme={theme} />}
-                {focusSection === "skills" && <SkillsComponent theme={theme} />}
-                {focusSection === "blog" && <MediumNotionComponent theme={theme} isDrawer={true} />}
-              </>
-            ) : (
-              /* Telemetry Console Overview in Home Mode */
-              <div className="flex flex-col items-center text-center justify-center py-6 px-4 space-y-4">
-                <div className={`p-3 rounded-full border ${theme === "dark" ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-400" : "border-blue-500/20 bg-blue-500/5 text-blue-600"}`}>
-                  <span className="text-xl animate-pulse">📡</span>
-                </div>
-                <h3 className="text-sm font-black uppercase tracking-wider font-mono">Telemetry Scan Mode</h3>
-                <p className={`text-xs leading-relaxed max-w-[280px] ${theme === "dark" ? "text-gray-400" : "text-slate-500"}`}>
-                  Swipe the 3D orbital space above to scan satellite links, or tap coordinates below to inspect active deployments.
-                </p>
+              {/* Carousel Content Control Panel */}
+              <div className="flex items-center justify-between py-3 gap-2">
                 <button
-                  onClick={() => setFocusSection("about")}
-                  className={`w-full max-w-[200px] py-2 rounded-xl text-center text-xs font-semibold transition-all duration-300 shadow-md ${
+                  onClick={handlePrevMobile}
+                  className={`p-2 rounded-lg border text-xs font-bold transition-all ${
+                    theme === "dark"
+                      ? "border-slate-800 bg-slate-900 text-gray-400 hover:text-emerald-400"
+                      : "border-slate-200 bg-slate-50 text-slate-500 hover:text-blue-600"
+                  }`}
+                >
+                  ◀
+                </button>
+
+                <div className="flex-1 text-center px-1">
+                  <h3 className="text-xs font-black uppercase tracking-wider font-mono">
+                    {carouselCards[activeIndex].title}
+                  </h3>
+                  <p className={`text-[10px] leading-relaxed mt-1 line-clamp-2 ${
+                    theme === "dark" ? "text-gray-400" : "text-slate-500"
+                  }`}>
+                    {carouselCards[activeIndex].summary}
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleNextMobile}
+                  className={`p-2 rounded-lg border text-xs font-bold transition-all ${
+                    theme === "dark"
+                      ? "border-slate-800 bg-slate-900 text-gray-400 hover:text-emerald-400"
+                      : "border-slate-200 bg-slate-50 text-slate-500 hover:text-blue-600"
+                  }`}
+                >
+                  ▶
+                </button>
+              </div>
+
+              {/* Action Button */}
+              {carouselCards[activeIndex].id !== "home" ? (
+                <button
+                  onClick={() => setIsExpanded(true)}
+                  className={`w-full py-2 rounded-xl text-center text-xs font-black uppercase tracking-wider transition-all duration-300 shadow-md ${
                     theme === "dark"
                       ? "bg-emerald-500 text-slate-950 hover:bg-emerald-400"
                       : "bg-blue-600 text-white hover:bg-blue-500"
                   }`}
                 >
-                  Initiate Scan
+                  [ TAP TO EXPAND NODE DETAILS ]
                 </button>
-              </div>
-            )}
+              ) : (
+                <button
+                  onClick={() => setFocusSection("about")}
+                  className={`w-full py-2 rounded-xl text-center text-xs font-black uppercase tracking-wider transition-all duration-300 border ${
+                    theme === "dark"
+                      ? "border-emerald-500/30 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20"
+                      : "border-blue-500/30 text-blue-600 bg-blue-500/5 hover:bg-blue-500/10"
+                  }`}
+                >
+                  [ INITIATE SPACE SCAN ]
+                </button>
+              )}
+            </div>
+
+            {/* Quick shortcuts dot indicators */}
+            <div className="flex justify-center gap-1.5 pb-1">
+              {nodeIds.map((id, idx) => (
+                <button
+                  key={id}
+                  onClick={() => setFocusSection(id)}
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                    activeIndex === idx
+                      ? theme === "dark" ? "bg-emerald-400 w-3" : "bg-blue-600 w-3"
+                      : theme === "dark" ? "bg-gray-800" : "bg-gray-300"
+                  }`}
+                />
+              ))}
+            </div>
           </div>
 
-          {/* Mobile Footer Navigation & Tab select */}
-          <div className={`px-5 py-3.5 flex flex-col gap-2 border-t ${
-            theme === "dark" ? "border-slate-900 bg-slate-950/40" : "border-slate-100 bg-slate-50/50"
-          }`}>
-            {focusSection && focusSection !== "home" ? (
-              <div className="flex items-center gap-2.5 w-full justify-between">
-                <button
-                  onClick={handlePrevNode}
-                  className={`px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-wider transition-colors ${
-                    theme === "dark"
-                      ? "border-slate-800 bg-slate-900 text-gray-400 hover:text-emerald-400"
-                      : "border-slate-200 bg-slate-50 text-slate-500 hover:text-blue-600"
-                  }`}
-                >
-                  &larr; Prev Node
-                </button>
-                
-                <span className="text-[8px] font-mono text-gray-500 select-none">
-                  SEC: {nodes.findIndex((n) => n.id === focusSection) + 1} / {nodes.length}
-                </span>
-
-                <button
-                  onClick={handleNextNode}
-                  className={`px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-wider transition-colors ${
-                    theme === "dark"
-                      ? "border-slate-800 bg-slate-900 text-gray-400 hover:text-emerald-400"
-                      : "border-slate-200 bg-slate-50 text-slate-500 hover:text-blue-600"
-                  }`}
-                >
-                  Next Node &rarr;
-                </button>
-              </div>
-            ) : (
-              <div className="flex flex-wrap items-center justify-center gap-1.5 py-1">
-                {nodes.map((sec) => (
+          {/* Full Screen Scrollable Details Drawer (Toggled by tap) */}
+          <AnimatePresence>
+            {isExpanded && focusSection && focusSection !== "home" && (
+              <motion.div
+                initial={{ y: "100%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: "100%", opacity: 0 }}
+                transition={{ type: "spring", damping: 28, stiffness: 140 }}
+                className={`fixed inset-x-0 bottom-0 top-16 z-50 flex flex-col justify-between overflow-hidden shadow-2xl backdrop-blur-2xl border-t transition-all duration-300 rounded-t-3xl ${
+                  theme === "dark"
+                    ? "border-emerald-500/20 bg-slate-950/95 text-white"
+                    : "border-slate-200 bg-white/98 text-slate-800"
+                }`}
+              >
+                {/* Header */}
+                <div className={`px-5 py-4 flex items-center justify-between border-b ${
+                  theme === "dark" ? "border-slate-900 bg-slate-950/40" : "border-slate-100 bg-slate-50/50"
+                }`}>
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${
+                      theme === "dark" ? "bg-emerald-400 animate-pulse" : "bg-blue-600 animate-pulse"
+                    }`} />
+                    <div className="flex flex-col">
+                      <span className={`text-[8px] font-mono tracking-widest ${
+                        theme === "dark" ? "text-emerald-400/80" : "text-blue-600/80"
+                      }`}>
+                        SEC SCAN ACTIVE // COORD: {nodes.find((n) => n.id === focusSection)?.angle.toFixed(2)}
+                      </span>
+                      <h2 className="text-sm font-black uppercase tracking-wider font-mono">
+                        {nodes.find((n) => n.id === focusSection)?.title}
+                      </h2>
+                    </div>
+                  </div>
                   <button
-                    key={sec.id}
-                    onClick={() => setFocusSection(sec.id)}
-                    className={`px-2.5 py-1 rounded-full text-[8px] font-bold uppercase tracking-wider border transition-all duration-300 ${
+                    onClick={() => setIsExpanded(false)}
+                    className={`px-3 py-1 rounded-xl text-xs font-bold border transition-colors ${
                       theme === "dark"
-                        ? "border-slate-800/80 bg-slate-900/50 text-slate-400 hover:text-emerald-400 hover:border-emerald-500/20"
-                        : "border-slate-200 bg-slate-50 text-slate-500 hover:text-blue-600 hover:border-blue-500/20"
+                        ? "border-slate-800 bg-slate-900 text-emerald-400"
+                        : "border-slate-200 bg-slate-100 text-blue-600"
                     }`}
                   >
-                    {sec.title.split(" ")[0]}
+                    ✕ Close
                   </button>
-                ))}
-              </div>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto px-5 py-4 custom-scrollbar select-text">
+                  {focusSection === "about" && <AboutUs profilePicUrl="/027A1497.jpeg" theme={theme} />}
+                  {focusSection === "experience" && <WorkExperience theme={theme} />}
+                  {focusSection === "console" && (
+                    <div className="space-y-4">
+                      <AgentConsole theme={theme} onF1Complete={() => {}} onTabChange={setActiveTab} />
+                      {activeTab === "F1 Predictor" && (
+                        <div className={`mt-4 border-t border-dashed pt-4 ${
+                          theme === "dark" ? "border-slate-800" : "border-slate-200"
+                        }`}>
+                          <DriverStandings />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {focusSection === "projects" && <ProjectsComponent theme={theme} />}
+                  {focusSection === "skills" && <SkillsComponent theme={theme} />}
+                  {focusSection === "blog" && <MediumNotionComponent theme={theme} isDrawer={true} />}
+                </div>
+
+                {/* Footer Controls inside Drawer */}
+                <div className={`px-5 py-3.5 flex items-center justify-between border-t ${
+                  theme === "dark" ? "border-slate-900 bg-slate-950/40" : "border-slate-100 bg-slate-50/50"
+                }`}>
+                  <button
+                    onClick={handlePrevNode}
+                    className={`px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-wider transition-colors ${
+                      theme === "dark"
+                        ? "border-slate-800 bg-slate-900 text-gray-400 hover:text-emerald-400"
+                        : "border-slate-200 bg-slate-50 text-slate-500 hover:text-blue-600"
+                    }`}
+                  >
+                    &larr; Prev Node
+                  </button>
+                  
+                  <span className="text-[8px] font-mono text-gray-500 select-none">
+                    SEC: {nodes.findIndex((n) => n.id === focusSection) + 1} / {nodes.length}
+                  </span>
+
+                  <button
+                    onClick={handleNextNode}
+                    className={`px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-wider transition-colors ${
+                      theme === "dark"
+                        ? "border-slate-800 bg-slate-900 text-gray-400 hover:text-emerald-400"
+                        : "border-slate-200 bg-slate-50 text-slate-500 hover:text-blue-600"
+                    }`}
+                  >
+                    Next Node &rarr;
+                  </button>
+                </div>
+              </motion.div>
             )}
-          </div>
-        </div>
+          </AnimatePresence>
+        </>
       ) : (
         /* Desktop layouts (drawer overlays) */
         <>
@@ -1033,69 +1158,6 @@ export default function ThreeDWorkspace({
             </div>
           </div>
         </>
-      )}
-
-      {/* SPACE TOUR GUIDE ONBOARDING OVERLAY */}
-      {!dismissTour && (
-        <div className={`absolute z-50 w-[300px] max-w-[calc(100vw-3rem)] rounded-2xl border p-5 shadow-[0_15px_40px_rgba(0,0,0,0.6)] backdrop-blur-md transition-all duration-500 ${
-          isMobile
-            ? "left-1/2 -translate-x-1/2 bottom-20"
-            : "right-6 top-20"
-        } ${
-          theme === "dark" 
-            ? "border-emerald-500/30 bg-slate-950/92 text-white shadow-[0_10px_35px_rgba(16,185,129,0.15)]" 
-            : "border-slate-200 bg-white/95 text-slate-800 shadow-[0_10px_20px_rgba(15,23,42,0.06)]"
-        }`}>
-          <div className="flex items-center justify-between mb-3 border-b border-gray-800/40 pb-2">
-            <div className="flex items-center gap-2">
-              <span className={`w-2.5 h-2.5 rounded-full ${theme === "dark" ? "bg-emerald-400 animate-pulse" : "bg-blue-500 animate-pulse"}`}></span>
-              <h3 className={`text-xs font-bold uppercase tracking-wider ${theme === "dark" ? "text-emerald-400" : "text-blue-600"}`}>System Initialized</h3>
-            </div>
-            <button 
-              onClick={handleDismissTour}
-              className="text-gray-400 hover:text-gray-200 text-xs transition-colors"
-            >
-              ✕
-            </button>
-          </div>
-          <h4 className="text-[11px] font-bold uppercase tracking-widest mb-1.5 text-current">Holographic Space</h4>
-          <p className={`text-[11px] leading-relaxed mb-4 ${theme === "dark" ? "text-gray-300" : "text-slate-600"}`}>
-            Inspect Bharat's tech deployments connected globally around this 3D sphere.
-            Toggle between the 3D Space and the 2D Classic mode anytime in the header.
-          </p>
-          <div className="space-y-3 mb-4">
-            <div className="flex items-start gap-2 text-[10px] leading-normal">
-              <span className={`font-bold ${theme === "dark" ? "text-emerald-400" : "text-blue-600"}`}>1. 3D Satellites:</span>
-              <span className={theme === "dark" ? "text-gray-400" : "text-slate-500"}>Click any floating satellite or title tag in the 3D space to trigger node selection.</span>
-            </div>
-            <div className="flex items-start gap-2 text-[10px] leading-normal">
-              <span className={`font-bold ${theme === "dark" ? "text-emerald-400" : "text-blue-600"}`}>2. 2D HUD Console:</span>
-              <span className={theme === "dark" ? "text-gray-400" : "text-slate-500"}>Enjoy 100% crisp typography, native smooth scrolling, and perfect touch response.</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setFocusSection("about")}
-              className={`flex-1 py-1.5 rounded-lg text-center text-xs font-semibold transition-all duration-300 ${
-                theme === "dark" 
-                  ? "bg-emerald-500 text-slate-950 hover:bg-emerald-400 hover:shadow-[0_0_12px_rgba(16,185,129,0.4)]" 
-                  : "bg-blue-600 text-white hover:bg-blue-500"
-              }`}
-            >
-              Initiate Space Scan
-            </button>
-            <button
-              onClick={handleDismissTour}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300 border ${
-                theme === "dark"
-                  ? "border-gray-800 text-gray-400 hover:text-white hover:bg-gray-900"
-                  : "border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50"
-              }`}
-            >
-              Skip Scan
-            </button>
-          </div>
-        </div>
       )}
     </div>
   );
