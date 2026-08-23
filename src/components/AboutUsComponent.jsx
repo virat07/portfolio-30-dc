@@ -82,16 +82,16 @@ const AboutCard = ({ profilePicUrl, theme = "light" }) => {
           theme === "dark" ? "text-gray-300" : "text-slate-600"
         }`}>
           <p>
-            I’m Bharat Gupta, a frontend-focused software engineer with 6+ years
-            of experience crafting high-performance React applications and full-stack
-            systems. Backed by a strong foundation in computer science from my Master’s at
-            California State University, San Bernardino.
+            I’m Bharat Gupta — I don’t just write code, I make engineering teams faster.
+            Over 6+ years I’ve built high-performance React applications and full-stack
+            systems, sharpened by a Master’s in Computer Science from California State
+            University, San Bernardino.
           </p>
           <p>
-            Throughout my career, I’ve led high-impact projects—from building agentic
-            development workflows using Figma MCP and Claude that slash component build times,
-            to scaling marketplace platforms and optimizing Core Web Vitals to achieve
-            dramatic performance gains.
+            I design AI-powered workflows that turn a day of component-building into
+            minutes, and I’ve scaled marketplace platforms into serious revenue drivers
+            through SEO, A/B testing, and conversion strategy that consistently moves the
+            needle. When a workflow is slow or a platform isn’t converting, I find the fix.
           </p>
 
           {/* Stats Grid */}
